@@ -4,9 +4,12 @@
 %defines
 \def\bY{{\bf Y}}
 \def\bE{{\bf E}}
+\def\bV{{\bf V}}
+\def\bC{{\bf C}}
 \def\b1{{\bf 1}}
 \def\blambda{{\boldsymbol \lambda}}
 \def\bgamma{{\boldsymbol \gamma}}
+\def\bnu{{\boldsymbol \nu}}
 
 %opening
 \title{Home Assignment - 1}
@@ -68,6 +71,15 @@ Therefore,
  &= \b1_u \beta.
 \end{align*}
 
+Finally, consider a second unbiased predictor of $\bY_u$, given by $\tilde \bY_u = (\blambda + \bnu)^T \bY_k$. From the unbiasedness criterion, we have that $\bE(\tilde \bY_u) = \bE(\hat \bY_u)$. Therefore, $(\blambda + \bnu)^T \bE(\bY_k) = \blambda^T \bE(\bY_k)$, implying $\bnu^T \b1_k = 0$. Furthermore, consider the variance of the second predictor
+\begin{align*}
+ \bV(\tilde \bY_u - \bY_u) &= \bV(\bnu^T \bY_k + (\blambda^T \bY_k - \bY_u))\\
+ &= \bV(\bnu^T \bY_k) + \bV(\hat \bY_u - \bY_u) + 2\bC(\bnu^T \bY_k, \hat \bY_u - \bY_u) \\
+ &\ge \bV(\hat \bY_u - \bY_u) + 2\bC(\bnu^T \bY_k, \hat \bY_u - \bY_u)\\
+ &= \bV(\hat \bY_u - \bY_u) + 2\bnu^T \bC(\bY_k, \hat \bY_u) - 2 \bnu^T \bC(\bY_k, \bY_u) \\
+ &= \bV(\hat \bY_u - \bY_u) + 2\bnu^T \left(  \Sigma_{kk} \blambda - \Sigma_{uk}\right)
+\end{align*}
+Thus, if we can choose $\blambda$ such that $\bnu^T \left(  \Sigma_{kk} \blambda - \Sigma_{uk}\right) = 0$, then, we have that $\bV(\tilde \bY_u - \bY_u) \ge \bV(\hat \bY_u - \bY_u)$ for any unbiased predictor $\tilde \bY_u$.
 \section{Data}
 
 \section{Least-Squares}
