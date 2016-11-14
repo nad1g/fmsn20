@@ -3,6 +3,7 @@
 
 %defines
 \def\bY{{\bf Y}}
+\def\bE{{\bf E}}
 \def\b1{{\bf 1}}
 \def\blambda{{\boldsymbol \lambda}}
 \def\bgamma{{\boldsymbol \gamma}}
@@ -54,7 +55,24 @@ We note that the vector $\bgamma^T$ is of dimensions $1 \times n$, and therefore
 \end{align*}
 where $\blambda = \left( \b1_u \bgamma^T + \Sigma_{uk} \Sigma_{kk}^{-1} -  \Sigma_{uk} \Sigma_{kk}^{-1}  \b1_k \bgamma^T \right)^T$.
 
-Secondly, we show that the predictions are unbiased.
+Secondly, we show that the predictions are unbiased, i.e., $\bE(\hat \bY_u) = \bE(\bY_u)$. The expected value of $\hat \beta$ is given by
+\begin{align*}
+ \bE \left( \hat \beta \right) &= \left( \b1_k^T \Sigma_{kk}^{-1} \b1_k \right)^{-1} \b1_k^T \Sigma_{kk}^{-1} ~ \bE (\bY_k) \\
+  &= \left( \b1_k^T \Sigma_{kk}^{-1} \b1_k \right)^{-1} \b1_k^T \Sigma_{kk}^{-1} ~ \b1_k \beta \\
+  &= \beta.
+\end{align*}
+Therefore,
+\begin{align*}
+ \bE(\hat \bY_u) &=  \b1_u \bE\left(\hat \beta \right) + \Sigma_{uk} \Sigma_{kk}^{-1}\left( \bE(\bY_k) - \b1_k \bE \left(\hat \beta \right)\right) \\
+ &= \b1_u \beta + \Sigma_{uk} \Sigma_{kk}^{-1}\left( \b1_k \beta - \b1_k \beta \right) \\
+ &= \b1_u \beta.
+\end{align*}
+
+\section{Data}
+
+\section{Least-Squares}
+
+\section{Universal Kriging}
 
 \section{Conclusions}
 
