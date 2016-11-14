@@ -1,0 +1,61 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{amsmath}
+
+%defines
+\def\bY{{\bf Y}}
+\def\b1{{\bf 1}}
+\def\blambda{{\boldsymbol \lambda}}
+\def\bgamma{{\boldsymbol \gamma}}
+
+%opening
+\title{Home Assignment - 1}
+\author{Santhosh Nadig}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Theory}
+Let $\bY_k$ represent the $n$ known observations of spatial data and $\bY_u$ represent the $m$ data points that needs to be estimated. For ordinary Kriging ($\mu = \b1 \beta$), the optimal predictions are given by
+\begin{align*}
+ \hat \bY_u &= \b1_u \hat \beta + \Sigma_{uk} \Sigma_{kk}^{-1}\left( \bY_k - \b1_k \hat \beta \right) \\
+ \hat \beta &= \left( \b1_k^T \Sigma_{kk}^{-1} \b1_k \right)^{-1} \b1_k^T \Sigma_{kk}^{-1} \bY_k,
+\end{align*}
+where
+\begin{align*}
+ &\begin{bmatrix}
+  \bY_k \\
+  \bY_u
+ \end{bmatrix} \in
+ \mathbf{N} \left( 
+ \begin{bmatrix}
+    \b1_k \beta \\
+   \b1_u \beta
+  \end{bmatrix},
+  \begin{bmatrix}
+   \Sigma_{kk} & \Sigma_{ku} \\
+   \Sigma_{uk} & \Sigma_{uu}
+  \end{bmatrix}
+  \right).
+\end{align*}
+
+Firstly, we show that the predictions are linear in the observations, i.e., $\hat \bY_u = \blambda^T \bY_k$ for some $\blambda$. We may re-write $\hat \beta$ as
+\begin{align*}
+ \hat \beta &= \bgamma^T \bY_k \\
+ \bgamma &= \left( \left( \b1_k^T \Sigma_{kk}^{-1} \b1_k \right)^{-1} \b1_k^T \Sigma_{kk}^{-1} \right)^T.
+\end{align*}
+We note that the vector $\bgamma^T$ is of dimensions $1 \times n$, and therefore, $\hat \beta$ is a scalar. Substituting the above in the expression for $\hat \bY_u$, we obtain
+\begin{align*}
+ \hat \bY_u &= \b1_u \bgamma^T \bY_k + \Sigma_{uk} \Sigma_{kk}^{-1} \bY_k -  \Sigma_{uk} \Sigma_{kk}^{-1}  \b1_k \bgamma^T \bY_k \\
+      &= \left( \b1_u \bgamma^T + \Sigma_{uk} \Sigma_{kk}^{-1} -  \Sigma_{uk} \Sigma_{kk}^{-1}  \b1_k \bgamma^T \right) \bY_k \\
+      &= \blambda^T \bY_k,
+\end{align*}
+where $\blambda = \left( \b1_u \bgamma^T + \Sigma_{uk} \Sigma_{kk}^{-1} -  \Sigma_{uk} \Sigma_{kk}^{-1}  \b1_k \bgamma^T \right)^T$.
+
+Secondly, we show that the predictions are unbiased.
+
+\section{Conclusions}
+
+\end{document}
