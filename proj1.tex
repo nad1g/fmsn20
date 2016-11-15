@@ -1,5 +1,5 @@
 \documentclass[a4paper,10pt]{article}
-\usepackage{amsmath}
+\usepackage{amsmath,graphicx,float}
 
 %defines
 \def\bY{{\bf Y}}
@@ -7,9 +7,12 @@
 \def\bV{{\bf V}}
 \def\bC{{\bf C}}
 \def\b1{{\bf 1}}
+\def\bx{{\bf x}}
 \def\blambda{{\boldsymbol \lambda}}
 \def\bgamma{{\boldsymbol \gamma}}
 \def\bnu{{\boldsymbol \nu}}
+\def\bmu{{\boldsymbol \mu}}
+\def\sigmaeps{{\sigma_{\epsilon}}}
 
 %opening
 \title{Home Assignment - 1}
@@ -82,8 +85,34 @@ Finally, consider a second unbiased predictor of $\bY_u$, given by $\tilde \bY_u
 Thus, if we can choose $\blambda$ such that $\bnu^T \left(  \Sigma_{kk} \blambda - \Sigma_{uk}\right) = 0$, then, we have that $\bV(\tilde \bY_u - \bY_u) \ge \bV(\hat \bY_u - \bY_u)$ for any unbiased predictor $\tilde \bY_u$.
 
 \section{Swedish Temparature Reconstruction}
-The data consists of average temperature during June 2005 measured at 250 stations across Sweden. In addition, the latitude, longitude, elevation and distance to both the Swedish coast and to any coastline are provided too. Figure~  shows the plot of average temperature, elevation and distance to any coast. The average temperatures are higher in the South (lower latitudes) and towards the coast, as expected.
+The data consists of average temperature during June 2005 measured at 250 stations across Sweden. In addition, the latitude, longitude, elevation and distance to both the Swedish coast and to any coastline are provided too. Figure \ref{fig:rawdataplot} shows the plot of average temperature, elevation and distance to any coast. The average temperatures are higher in the South (lower latitudes) and towards the coast, as expected.
+\begin{figure}[ht]
+	\includegraphics[width=0.8\linewidth]{raw_data_plot.png}
+	\caption{Raw Data Plot...}
+	\label{fig:rawdataplot}
+\end{figure}
 \subsection{Least-Squares}
+The mean of the spatial data is modelled as a linear function of the covariates. Figure \ref{fig:covariates} shows a plot of the mean temperature (observations) as a function of the available covariates.
+\begin{figure}[ht]
+	\includegraphics[width=0.8\linewidth]{covariates.png}
+	\caption{Observation vs covariates}
+	\label{fig:covariates}
+\end{figure}
+The covariates that have a linear relationship are the latitude ($\bx_1$), elevation ($\bx_2$) and distance to Swedish coast ($\bx_3$). Thus the mean function is expressed as
+\begin{equation}
+  \bmu = \beta_0 + \beta_1 \bx_1 + \beta_2 \bx_2 + \beta_3 \bx_3
+\end{equation}
+where $\beta_0$ is the intercept and $\beta_1 \dots \beta_3$ are the regressors. With $N = 250$ observations from the known locations, the estimated parameters (and their standard deviations ) are tabulated below.
+\begin{table}[H]
+\begin{tabular}{lcc}
+Parameter & Estimate & SE \\
+$\beta_0$ & 24.553445 & 0.928379 \\
+$\beta_1$ & -0.177836 & 0.015600\\
+$\beta_2$ & -0.004178 & 0.000455\\
+$\beta_3$ & -0.092380 &  0.015663\\
+\end{tabular}
+\end{table}
+The variance of the residuals $\sigmaeps^2 = 0.550609$.
 
 \subsection{Universal Kriging}
 

@@ -69,8 +69,18 @@ grid = SweGrid(Ind,:);
 %create a matrix holding "predicitons"
 mu = nan(sz);
 %do "predicitons"
-beta_ = ols(SweObs(:,[2,3,5]), SweObs(:,6));
-E = grid(:,[2,3,5])*beta_;
+N = size(SweObs,1);
+A = [ones(N,1) SweObs(:,[2,3,5])];
+y = SweObs(:,6);
+[beta_,resid,sigma2,Sigma]= ols(A,y);
+fprintf('-- Ordinary Least Squares --\n');
+fprintf('Number of observations = %d\n', N);
+fprintf('Variance of the residuals = %f\n', sigma2);
+seBeta = sqrt(diag(Sigma));
+for ii = 1:length(seBeta),
+    fprintf('beta_%d = %f, SE (beta_%d) = %f\n', ii, beta_(ii), ii, seBeta(ii));
+end
+E = beta_(1) + grid(:,[2,3,5])*beta_(2:end);
 %and fit these into the relevant points
 mu(Ind) = E;
 %plot
