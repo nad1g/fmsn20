@@ -1,8 +1,9 @@
 \documentclass[a4paper,10pt]{article}
-\usepackage{amsmath,graphicx,float,subfig}
+\usepackage{amsmath,amssymb,graphicx,float,subfig}
 
 %defines
 \def\bY{{\bf Y}}
+\def\bX{{\bf X}}
 \def\bE{{\bf E}}
 \def\bV{{\bf V}}
 \def\bC{{\bf C}}
@@ -10,6 +11,7 @@
 \def\bx{{\bf x}}
 \def\blambda{{\boldsymbol \lambda}}
 \def\bgamma{{\boldsymbol \gamma}}
+\def\bbeta{{\boldsymbol \beta}}
 \def\bnu{{\boldsymbol \nu}}
 \def\bmu{{\boldsymbol \mu}}
 \def\sigmaeps{{\sigma_{\epsilon}}}
@@ -87,6 +89,7 @@ Thus, if we can choose $\blambda$ such that $\bnu^T \left(  \Sigma_{kk} \blambda
 \section{Swedish Temparature Reconstruction}
 The data consists of average temperature during June 2005 measured at 250 stations across Sweden. In addition, the latitude, longitude, elevation and distance to both the Swedish coast and to any coastline are provided too. Figure \ref{fig:rawdataplot} shows the plot of average temperature, elevation and distance to any coast. The average temperatures are higher in the South (lower latitudes) and towards the coast, as expected.
 \begin{figure}[ht]
+	\centering
 	\includegraphics[width=0.8\linewidth]{raw_data_plot.png}
 	\caption{Raw Data Plot...}
 	\label{fig:rawdataplot}
@@ -125,28 +128,48 @@ The standard errors of the residuals and the Akaike Information Criterion (AIC) 
 \label{fig:modperf}
 \end{figure}
 
-Thus, using model A, we may express the observed temperature $\bmu$ as a linear function of latitude ($\bx_1$), elevation ($\bx_2$), distance to any coast ($\bx_3$) and the distance to Swedish coast ($\bx_4$).
-\begin{equation}
-  \bmu = \beta_0 + \beta_1 \bx_1 + \beta_2 \bx_2 + \beta_3 \bx_3 + + \beta_4 \bx_4 + {\boldsymbol \epsilon}
-\end{equation}
-where $\beta_0$ is the intercept, $\beta_1 \dots \beta_4$ are the parameters and ${\boldsymbol \epsilon} \sim N(0,{\bf I})$. The estimated parameters (and their standard deviations ) are tabulated below.
+Thus, using model A, we may express the observed temperature $\bY$ as a linear function of latitude ($\bx_1$), elevation ($\bx_2$), distance to any coast ($\bx_3$) and the distance to Swedish coast ($\bx_4$).
+\begin{align}
+  \bY &\triangleq \bX \bbeta +  {\boldsymbol \epsilon}  \nonumber \\
+   \bY &= \beta_0 + \beta_1 \bx_1 + \beta_2 \bx_2 + \beta_3 \bx_3 + + \beta_4 \bx_4 + {\boldsymbol \epsilon}
+\end{align}
+where $\beta_0$ is the intercept, $\beta_1 \dots \beta_4$ are the parameters and ${\boldsymbol \epsilon} \sim N(0,{\bf I})$. For  validation, 25 observations are set aside and we use $N = 225$ data points for the model parameter estimation. The estimated parameters are given by the least-squares solution $\hat \bbeta = (\bX^T \bX)^{-1} \bX^T \bY$. The estimated parameters (and their standard deviations ) are tabulated below.
 \begin{table}[H]
 \centering
 \begin{tabular}{lcc}
 \hline
 {\bf Parameter} & {\bf Estimate} & {\bf SE }\\
 \hline
-$\hat \beta_0$ & 24.023 & 0.9 \\
-$\hat \beta_1$ & -0.169 & 0.015\\
-$\hat \beta_2$ & -0.005 & 0.0004 \\
-$\hat \beta_3$ & 0.115 & 0.025\\
-$\hat \beta_4$ & -0.09 & 0.025\\
+$\hat \beta_0$ & 23.972 & 0.95 \\
+$\hat \beta_1$ & -0.169 & 0.016\\
+$\hat \beta_2$ & -0.005 & 0.0005 \\
+$\hat \beta_3$ & 0.106 & 0.025\\
+$\hat \beta_4$ & -0.089 & 0.015\\
 \hline
 \end{tabular}
 \caption{Parameter Estimates and corresponding standard errors.}
 \label{tab:olsest}
 \end{table}
-The variance of the residuals $\sigmaeps^2 = 0.5098$.
+The variance of the residuals $\sigmaeps^2 = 0.48$. The mean temperatures at the validation points are given by
+\begin{equation}
+\bE(\hat \bY_v) = \bX_v \hat \bbeta
+\end{equation}
+where $\hat \bY_v$ denotes the average temperature estimates at the validation points, $\bX_v$  the regressor matrix formed using the latitude, elevation, distance to any coast and distance to Swedish coast of the 25 validation points and $\hat \bbeta$ the estimated model parameters. The variance and the 95\% confidence interval are given by
+\begin{align*}
+\bV(\hat \bY_v) &= \sigmaeps^2 (\bX_v (\bX_v^T\bX_v)^{-1} \bX_v^T + 1) \\
+\text{CI, 95\%} &= \bE(\hat \bY_v) \pm 1.96 \text{ SE}(\hat \bY_v)
+\end{align*}
+where $\text{SE}(\hat \bY_v) = \sqrt{\bV(\hat \bY_v)}$. Figure \ref{fig:olsresults} shows a plot of prediction and confidence intervals for the validation points and also the predictions for the {\texttt{SweGrid}} data along with the corresponding standard error.
+\begin{figure}[ht]
+\centering
+  \subfloat[]{{\includegraphics[width=4.5cm]{ols_valdat_pred_ci.png} }}%
+  \qquad
+  \subfloat[]{{\includegraphics[width=2.8cm]{pred_ols_grid.png} }}%
+  \qquad
+  \subfloat[]{{\includegraphics[width=2.8cm]{se_pred_ols.png} }}%
+  \caption{(a): Estimate and confidence intervals (95\%) for the 25 validation points. (b),(c): Predictions and SE of predictions for \texttt{SweGrid} data.}
+\label{fig:olsresults}
+\end{figure}
 
 \subsection{Universal Kriging}
 

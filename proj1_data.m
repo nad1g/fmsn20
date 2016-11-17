@@ -84,9 +84,9 @@ E = beta_(1) + grid(:,[2,3,5])*beta_(2:end);
 %and fit these into the relevant points
 mu(Ind) = E;
 %plot
-figure(2)
+figure,
 imagesc([11.15 24.15], [69 55.4], mu, 'alphadata', Ind)
 axis xy; hold on
 plot(Border(:,1),Border(:,2), '-')
-hold off
+hold off; colorbar
 title('Predictions (OLS)')
