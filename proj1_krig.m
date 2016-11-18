@@ -1,9 +1,9 @@
+%
+% Universal Kriging
+%
+
 load HA1_SE_Temp
 sz = [273 260];
-%
-% OLS Model
-%
-%I_val = datasample(1:250,25,'Replace',false);
 I_val = randperm(250,25);
 I_obs = 1:250; I_obs(I_val) = [];
 
@@ -87,12 +87,38 @@ long = reshape(SweGrid(:,1), sz);
 Ind = ~isnan(long);
 grid = SweGrid(Ind,:);
 mu = nan(sz);
+% The regressor matrix A for the SweGrid unknown locations
 A_grid = [ones(length(grid),1) grid(:,[2,3,4,5])];
+% Co-ordinate matrix for the unknown locations
 U_uu = [grid(:,1) grid(:,2)];
-D_uu = distance_matrix(U_uu);
-Sigma_uu = matern_covariance(D_uu, sigma2, kappa, nu);
-% 
-% D_uk = distance_matrix(U_uu, U);
-% Sigma_uk = matern_covariance(D_uk, sigma2, kappa, nu);
-% y_grid = (A_grid * beta_) + Sigma_uk * (Sigma \ resid);
-% 
+% Calculate Sigma_uk (cross-cov between unknown, known locs)
+D_uk = distance_matrix(U_uu, U);
+Sigma_uk = matern_covariance(D_uk, sigma2, kappa, nu);
+% predict y for the grid (y_grid)
+y_grid = (A_grid * beta_) + Sigma_uk * (Sigma \ resid);
+% save it to plot it!
+mu(Ind) = y_grid;
+% NOTE: do not use the variance formula directly. We just need the diagonal
+% elements. So,
+% First term is diag(Sigma_uu). However, note that diag(D_uu) is just 0s.
+% Thus diag(Sigma_uu) = matern_covariance([0......0]', pars)
+D_diag_uu = zeros(length(grid),1);
+Sigma_diag_uu = matern_covariance(D_diag_uu, sigma2, kappa, nu);
+% Second term is diag(Sigma_uk * inv(Sigma) * Sigma_ku)
+% but Sigma_ku = Sigma_uk' (due to symmetry).
+term2 = Sigma_uk * (Sigma \ Sigma_uk');
+var_y_grid = Sigma_diag_uu - diag(term2);
+figure,
+imagesc([11.15 24.15], [69 55.4], mu, 'alphadata', Ind)
+axis xy; hold on
+plot(Border(:,1),Border(:,2), '-')
+hold off; colorbar
+title('Predictions (Kriging)')
+se = nan(sz);
+se(Ind) = sqrt(var_y_grid);
+figure,
+imagesc([11.15 24.15], [69 55.4], se, 'alphadata', Ind)
+axis xy; hold on
+plot(Border(:,1),Border(:,2), '-')
+hold off; colorbar;
+title('Standard Error of prediction (Kriging)');
