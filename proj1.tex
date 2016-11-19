@@ -7,8 +7,10 @@
 \def\bE{{\bf E}}
 \def\bV{{\bf V}}
 \def\bC{{\bf C}}
+\def\bH{{\bf H}}
 \def\b1{{\bf 1}}
 \def\bx{{\bf x}}
+\def\bs{{\bf s}}
 \def\blambda{{\boldsymbol \lambda}}
 \def\bgamma{{\boldsymbol \gamma}}
 \def\bbeta{{\boldsymbol \beta}}
@@ -87,15 +89,21 @@ Finally, consider a second unbiased predictor of $\bY_u$, given by $\tilde \bY_u
 Thus, if we can choose $\blambda$ such that $\bnu^T \left(  \Sigma_{kk} \blambda - \Sigma_{uk}\right) = 0$, then, we have that $\bV(\tilde \bY_u - \bY_u) \ge \bV(\hat \bY_u - \bY_u)$ for any unbiased predictor $\tilde \bY_u$.
 
 \section{Swedish Temparature Reconstruction}
-The data consists of average temperature during June 2005 measured at 250 stations across Sweden. In addition, the latitude, longitude, elevation and distance to both the Swedish coast and to any coastline are provided too. Figure \ref{fig:rawdataplot} shows the plot of average temperature, elevation and distance to any coast. The average temperatures are higher in the South (lower latitudes) and towards the coast, as expected.
+The dataset ({\texttt{SweObs}}) consists of average temperature during June 2005 measured at 250 stations across Sweden. The corresponding latitude, longitude, elevation and distance to both the Swedish coast and to any coastline are provided too. Figure \ref{fig:rawdataplot} shows the plot of average temperature, elevation and distance to any coast. The average temperatures are higher in the South (lower latitudes) and towards the coast, as expected.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\linewidth]{raw_data_plot.png}
-	\caption{Raw Data Plot...}
+	\caption{Plots showing (R-L) average temperature in June 2005, elevation and distance to any coastline.}
 	\label{fig:rawdataplot}
 \end{figure}
-\subsection{Least-Squares}
-The mean of the spatial data is modelled as a linear function of the covariates. Figure \ref{fig:covariates} shows a plot of the mean temperature (observations) as a function of the available covariates from the dataset {\texttt{SweObs}} containing the 250 measurements.
+\subsection{Ordinary Least Squares}
+The average temperature (observations), $\bY$ is modelled as a linear function of the covariates. 
+\begin{equation*}
+  \bY \triangleq \bX \bbeta +  {\boldsymbol \epsilon} 
+\end{equation*}
+where $\bX$ is the covariate matrix, $\bbeta$ is the parameter vector and ${\boldsymbol \epsilon} \in N(0, \sigmaeps^2 \mathbb{I})$.
+
+Figure \ref{fig:covariates} shows a plot of the observations as a function of the available covariates from {\texttt{SweObs}}.
 \begin{figure}[ht]
 	\includegraphics[width=0.8\linewidth]{covariates.png}
 	\caption{Observation vs covariates}
@@ -124,16 +132,20 @@ The standard errors of the residuals and the Akaike Information Criterion (AIC) 
   \subfloat[Std. Err of the residuals for each of the models.]{{\includegraphics[width=5cm]{RSS_models.png} }}%
   \qquad
   \subfloat[AIC for each of the models.]{{\includegraphics[width=5cm]{AIC_models.png} }}%
-  \caption{Performance evaluation of the five models (A,B,C,D,E). Model A has the least std. error of the residuals and the best AIC metric.}
+  \caption{Performance evaluation of the five models (A,B,C,D,E). Model A has the least Std. Err of the residuals and the best AIC metric.}
 \label{fig:modperf}
 \end{figure}
 
-Thus, using model A, we may express the observed temperature $\bY$ as a linear function of latitude ($\bx_1$), elevation ($\bx_2$), distance to any coast ($\bx_3$) and the distance to Swedish coast ($\bx_4$).
-\begin{align}
-  \bY &\triangleq \bX \bbeta +  {\boldsymbol \epsilon}  \nonumber \\
-   \bY &= \beta_0 + \beta_1 \bx_1 + \beta_2 \bx_2 + \beta_3 \bx_3 + + \beta_4 \bx_4 + {\boldsymbol \epsilon}
-\end{align}
-where $\beta_0$ is the intercept, $\beta_1 \dots \beta_4$ are the parameters and ${\boldsymbol \epsilon} \sim N(0,{\bf I})$. For  validation, 25 observations are set aside and we use $N = 225$ data points for the model parameter estimation. The estimated parameters are given by the least-squares solution $\hat \bbeta = (\bX^T \bX)^{-1} \bX^T \bY$. The estimated parameters (and their standard deviations ) are tabulated below.
+Thus, using model A, we may express the observations $\bY$ as a linear function of latitude ($\bx_1$), elevation ($\bx_2$), distance to any coast ($\bx_3$) and the distance to Swedish coast ($\bx_4$).
+\begin{equation}
+ \bY = \beta_0 + \beta_1 \bx_1 + \beta_2 \bx_2 + \beta_3 \bx_3 + + \beta_4 \bx_4 + {\boldsymbol \epsilon}
+\end{equation}
+where $\beta_0 \dots \beta_4$ are the parameters. For  validation, 25 randomly picked observations are set aside and we use $N = 225$ data points for the model parameter estimation. The estimated parameters and variance are given by
+\begin{align*}
+\hat \bbeta &= (\bX^T \bX)^{-1} \bX^T \bY\\
+\bV(\hat \bbeta | \sigmaeps^2) &= \sigmaeps^2 (\bX^T \bX)^{-1}
+\end{align*}
+ The estimated parameters (and their standard errors ) are tabulated below.
 \begin{table}[H]
 \centering
 \begin{tabular}{lcc}
@@ -147,7 +159,7 @@ $\hat \beta_3$ & 0.106 & 0.025\\
 $\hat \beta_4$ & -0.089 & 0.015\\
 \hline
 \end{tabular}
-\caption{Parameter Estimates and corresponding standard errors.}
+\caption{Parameter Estimates and corresponding standard errors (OLS).}
 \label{tab:olsest}
 \end{table}
 The variance of the residuals $\sigmaeps^2 = 0.48$. The mean temperatures at the validation points are given by
@@ -172,7 +184,9 @@ where $\text{SE}(\hat \bY_v) = \sqrt{\bV(\hat \bY_v)}$. Figure \ref{fig:olsresul
 \end{figure}
 
 \subsection{Universal Kriging}
+Firstly, we proceed to evaluate the spatial dependence in the residuals from the OLS model. A non-parametric approach (binned covariance function estimation [slide 13 lecture 03]) with 32 bins is used for this purpose. Figure~ shows the estimated covariance function of the residuals (as a function of the bins), where the bin $\bH_k = \{ (i,j): i \ne j, kh \le \| \bs_j - \bs_i \| < (k+1)h \}$. The confidence intervals are generated by the boxplot where the first and the third quantiles (25, 75) are shown. Thus, we see that there are five points outside the quantiles implying a significant covariance structure.
 
+The covariance function is modelled as a Matern covariance function whose parameters are estimated using the least squares method. That is, given the residuals $z_i$
 \section{Conclusions}
 
 \end{document}
