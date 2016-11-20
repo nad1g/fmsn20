@@ -21,7 +21,7 @@ figure, plot(D,cov_samples,'k.');
 Kmax = 32;
 Dmax = max(D(:))+0.1;
 par_fixed = zeros(4,1);
-par_fixed(3) = 4;
+%par_fixed(3) = 4;
 num_res = length(resid);
 [rhat,s2hat,m,n,d] = covest_nonparametric(U,resid,Kmax,Dmax);
 for iter = 1:100,
@@ -32,7 +32,7 @@ end
 boxplot(rr);
 hold on;
 plot(rhat,'k-*');
-
+figure, plot(m,'ko');
 
 for iter=1:3
   % compute binned covariance estimate
@@ -49,7 +49,7 @@ for iter=1:3
   % compute residuals
   resid = y-A*beta_;
 end
-
+vbeta_ = diag( s2hat * inv(A'*Sigma_inv_A) );
 % co-ordinates of the 'validation' locations
 U_uu = [SweObs(I_val,1) SweObs(I_val,2)];
 D_uu = distance_matrix(U_uu);
@@ -106,8 +106,12 @@ D_diag_uu = zeros(length(grid),1);
 Sigma_diag_uu = matern_covariance(D_diag_uu, sigma2, kappa, nu);
 % Second term is diag(Sigma_uk * inv(Sigma) * Sigma_ku)
 % but Sigma_ku = Sigma_uk' (due to symmetry).
-term2 = Sigma_uk * (Sigma \ Sigma_uk');
-var_y_grid = Sigma_diag_uu - diag(term2);
+inv_Sigma_Sigma_ku = (Sigma \ Sigma_uk');
+term2 = Sigma_uk * inv_Sigma_Sigma_ku;
+term3 = (A_grid' - A' * inv_Sigma_Sigma_ku);
+At_SigmaInv_A = A'*(Sigma\A);
+beta_var_adj = sum((term3'*inv(At_SigmaInv_A)).*term3',2);
+var_y_grid = Sigma_diag_uu - diag(term2) + beta_var_adj;
 figure,
 imagesc([11.15 24.15], [69 55.4], mu, 'alphadata', Ind)
 axis xy; hold on
