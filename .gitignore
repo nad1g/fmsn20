@@ -1,0 +1,8 @@
+
+*.gz
+
+.Rhistory
+
+*.aux
+
+*.log
