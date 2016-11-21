@@ -1,6 +1,7 @@
 %
 % Ordinary Least Squares
 %
+
 % load data
 load HA1_SE_Temp
 sz = [273 260];
@@ -12,52 +13,48 @@ dist_swe = reshape(SweGrid(:,5), sz);
 %points inside of Sweden (i.e. not nan)
 Ind = ~isnan(long);
 
-plot_covariates = 0;
-select_model = 0;
-%%
 % plot covariates
-if plot_covariates == 1
-    figure, subplot(3,2,1);
-    scatter(SweObs(:,1),SweObs(:,6),20,'filled');
-    xlabel('latitude');
-    subplot(3,2,2);
-    scatter(SweObs(:,2),SweObs(:,6),20,'r','filled');
-    xlabel('longitude');
-    subplot(3,2,3);
-    scatter(SweObs(:,3),SweObs(:,6),20,'g','filled');
-    xlabel('elevation');
-    subplot(3,2,4);
-    scatter(SweObs(:,4),SweObs(:,6),20,'m','filled');
-    xlabel('dist to any coast');
-    subplot(3,2,5);
-    scatter(SweObs(:,5),SweObs(:,6),20,'k','filled');
-    xlabel('dist to swe coast');
-end
-%%
-if select_model == 1
-    % select model
-    y = SweObs(:,6);
-    % model 1: intercept + latitude + elevation + dist coast + dist swe coast
-    disp('y ~ intercept + latitude + elevation + dist coast + dist swe coast')
-    A = [ones(250,1) SweObs(:,[2,3,4,5])];
-    [beta_,resid,sigma2,Sigma]= ols(A,y);
-    disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
-    % model 2: intercept + latitude + elevation + dist swe coast
-    disp('y ~ intercept + latitude + elevation + dist swe coast')
-    A = [ones(250,1) SweObs(:,[2,3,5])];
-    [beta_,resid,sigma2,Sigma]= ols(A,y);
-    disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
-    % model 3: intercept + latitude + elevation
-    disp('y ~ intercept + latitude + elevation')
-    A = [ones(250,1) SweObs(:,[2,3])];
-    [beta_,resid,sigma2,Sigma]= ols(A,y);
-    disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
-    % model 4: 
-    disp('y ~ intercept + latitude + dist swe coast')
-    A = [ones(250,1) SweObs(:,[2,5])];
-    [beta_,resid,sigma2,Sigma]= ols(A,y);
-    disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
-end
+
+figure, subplot(3,2,1);
+scatter(SweObs(:,1),SweObs(:,6),20,'filled');
+xlabel('latitude');
+subplot(3,2,2);
+scatter(SweObs(:,2),SweObs(:,6),20,'r','filled');
+xlabel('longitude');
+subplot(3,2,3);
+scatter(SweObs(:,3),SweObs(:,6),20,'g','filled');
+xlabel('elevation');
+subplot(3,2,4);
+scatter(SweObs(:,4),SweObs(:,6),20,'m','filled');
+xlabel('dist to any coast');
+subplot(3,2,5);
+scatter(SweObs(:,5),SweObs(:,6),20,'k','filled');
+xlabel('dist to swe coast');
+
+%% Evaluate various covariates and select the best ones.
+% select model
+y = SweObs(:,6);
+% model 1: intercept + latitude + elevation + dist coast + dist swe coast
+disp('y ~ intercept + latitude + elevation + dist coast + dist swe coast')
+A = [ones(250,1) SweObs(:,[2,3,4,5])];
+[beta_,resid,sigma2,Sigma]= ols(A,y);
+disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
+% model 2: intercept + latitude + elevation + dist swe coast
+disp('y ~ intercept + latitude + elevation + dist swe coast')
+A = [ones(250,1) SweObs(:,[2,3,5])];
+[beta_,resid,sigma2,Sigma]= ols(A,y);
+disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
+% model 3: intercept + latitude + elevation
+disp('y ~ intercept + latitude + elevation')
+A = [ones(250,1) SweObs(:,[2,3])];
+[beta_,resid,sigma2,Sigma]= ols(A,y);
+disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
+% model 4: 
+disp('y ~ intercept + latitude + dist swe coast')
+A = [ones(250,1) SweObs(:,[2,5])];
+[beta_,resid,sigma2,Sigma]= ols(A,y);
+disp(['SE of residuals = ',num2str(sqrt(sigma2))]);
+
 
 %%
 % estimate model parameters
@@ -106,7 +103,7 @@ title('Prediction intervals for OLS')
 grid = SweGrid(Ind,:);
 % create a matrix holding "predicitons"
 mu = nan(sz);
-A_grid = [ones(length(Ind(:)),1) grid(:,[2,3,4,5])];
+A_grid = [ones(length(grid),1) grid(:,[2,3,4,5])];
 E = A_grid*beta_;
 %and fit these into the relevant points
 mu(Ind) = E;
@@ -127,4 +124,5 @@ figure,
 imagesc([11.15 24.15], [69 55.4], se, 'alphadata', Ind)
 axis xy; hold on
 plot(Border(:,1),Border(:,2), '-')
-hold off
+hold off; colorbar
+title('SE of predictions (OLS)');

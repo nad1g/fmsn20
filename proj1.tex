@@ -228,7 +228,7 @@ $\hat \beta_4$ & -0.11 & 0.003\\
 
 Finally, the Kriging estimator for predicting the temperatures at the `unknown' locations ($\bY_u$) and the corresponding variance (adjusting for the estimated $\bbeta$s) is given by
 \begin{gather*}
-\bY_u = \bX_u \bbeta + \Sigma_{uk} \Sigma_{kk}^{-1} (\bY_k - \bX_u \bbeta) \\
+\bY_u = \bX_u \bbeta + \Sigma_{uk} \Sigma_{kk}^{-1} (\bY_k - \bX_k \bbeta) \\
 \begin{split}
 \bV(y_u| \bY_k, \btheta, \hat \bbeta) &= \Sigma_{uu} -  \Sigma_{uk} \Sigma_{kk}^{-1}\Sigma_{ku} + \\
 &(\bX_u^T - \bX_k^T \Sigma_{kk}^{-1}\Sigma_{ku})^T ( \bX_k^T \Sigma_{kk}^{-1} \bX_k)^{-1} (\bX_u^T - \bX_k^T \Sigma_{kk}^{-1}\Sigma_{ku})
