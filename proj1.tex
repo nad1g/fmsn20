@@ -91,7 +91,7 @@ Finally, consider a second unbiased predictor of $\bY_u$, given by $\tilde \bY_u
 Thus, if we can choose $\blambda$ such that $\bnu^T \left(  \Sigma_{kk} \blambda - \Sigma_{uk}\right) = 0$, then, we have that $\bV(\tilde \bY_u - \bY_u) \ge \bV(\hat \bY_u - \bY_u)$ for any unbiased predictor $\tilde \bY_u$.
 
 \section{Swedish Temparature Reconstruction}
-The dataset ({\texttt{SweObs}}) consists of average temperature during June 2005 measured at 250 stations across Sweden. The corresponding latitude, longitude, elevation and distance to both the Swedish coast and to any coastline are provided too. Figure \ref{fig:rawdataplot} shows the plot of average temperature, elevation and distance to any coast. The average temperatures are higher in the South (lower latitudes) and towards the coast, as expected.
+The dataset ({\texttt{SweObs}}) consists of average temperature during June 2005 measured at 250 stations across Sweden. The corresponding latitude, longitude, elevation and distance to both the Swedish coast and to any coastline are provided too. Figure \ref{fig:rawdataplot} shows the plot of average temperature, elevation and distance to any coast. The average temperatures are higher in the South (lower latitudes) and towards the coast, as expected. The \texttt{SweGrid} consists of a grid of 273-by-260 locations at which the average temperature should be predicted. We examine two methods -- ordinary least squares (OLS) and Kriging in the forthcoming sections.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\linewidth]{raw_data_plot.png}
@@ -235,7 +235,7 @@ Finally, the Kriging estimator for predicting the temperatures at the `unknown' 
 \end{split}
 \end{gather*}
 
-The estimated model parameters are validated using the 25 randomly chosen validation locations. Figure shows a plot of the true and predicted temperatures together with the confidence intervals for the validation locations. A plot of the prediction and standard errors for the predictions of the {\texttt{SweGrid}} data is shown in figure \ref{fig:krigresults}.
+The estimated model parameters are validated using the 25 randomly chosen validation locations. Figure shows a plot of the true and predicted temperatures together with the confidence intervals for the validation locations. A plot of the prediction and standard errors for the predictions of the {\texttt{SweGrid}} data is shown in figure \ref{fig:krigresults}. It is apparent that the predictions from Kriging method has lower variance compared to those from the OLS method.
 
 \begin{figure}[ht]
 \centering
@@ -254,7 +254,7 @@ The estimated model parameters are validated using the 25 randomly chosen valida
 \label{fig:krigresults}
 \end{figure}
 
-
 \section{Conclusions}
+In this report we examined two estimation methods, ordinary least squares and Krigining, for estimating the spatial process of the average temperature in June 2005 at various locations in Sweden. The ordinary least squares method is attractive due to its simplicity. However, the variance of the estimated model parameters and predictions is higher compared to that from Kriging method. Additionally, OLS may suffer in the presence of outliers and/or missing data in a region unless some care is taken (like outlier analysis and ensuring that known observations are spatially spread, etc.)
 
 \end{document}
