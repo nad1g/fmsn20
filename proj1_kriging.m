@@ -33,7 +33,7 @@ A_k = [ones(length(I_obs),1) SweObs(I_obs,[2,3,4,5])];
 % parameters:
 Kmax = 32; % num bins = Kmax+1
 Dmax = max(Dk(:))+0.1;
-par_fixed = zeros(4,1); %par_fixed(3) = 1.5; %parameters
+par_fixed = zeros(4,1); par_fixed(3) = 1.5; %parameters
 Nr = length(r); %number of residuals
 
 % non-parametric covariance estimation...

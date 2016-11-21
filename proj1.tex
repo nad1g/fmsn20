@@ -168,12 +168,12 @@ The variance of the residuals $\sigmaeps^2 = 0.48$. The mean temperatures at the
 \begin{equation}
 \bE(\hat \bY_v) = \bX_v \hat \bbeta
 \end{equation}
-where $\hat \bY_v$ denotes the average temperature estimates at the validation points, $\bX_v$  the regressor matrix formed using the latitude, elevation, distance to any coast and distance to Swedish coast of the 25 validation points and $\hat \bbeta$ the estimated model parameters. The variance and the 95\% confidence interval are given by
+where $\hat \bY_v$ denotes the average temperature estimates at the validation points, $\bX_v$  the regressor matrix formed using the latitude, elevation, distance to any coast and distance to Swedish coast of the 25 validation points and $\hat \bbeta$ the estimated model parameters. The variance and the $100(1-\alpha)$\% confidence interval are given by
 \begin{align*}
 \bV(\hat \bY_v) &= \sigmaeps^2 (\bX_v (\bX_v^T\bX_v)^{-1} \bX_v^T + 1) \\
-\text{CI, 95\%} &= \bE(\hat \bY_v) \pm 1.96 \text{ SE}(\hat \bY_v)
+\text{CI, 95\%} &= \bE(\hat \bY_v) \pm z_{\alpha/2} \text{ SE}(\hat \bY_v)
 \end{align*}
-where $\text{SE}(\hat \bY_v) = \sqrt{\bV(\hat \bY_v)}$. Figure \ref{fig:olsglsval}(a) shows a plot of prediction and confidence intervals for the validation points. The predictions for the {\texttt{SweGrid}} data along with the corresponding standard error are shown in figure \ref{fig:olsresults}.
+where $\text{SE}(\hat \bY_v) = \sqrt{\bV(\hat \bY_v)}$ and $z_{\alpha/2}$ is the upper $\alpha/2$ percentage point of a standard Normal distribution (for $\alpha = 5$, we get $z_{\alpha/2} = 1.96$). Figure \ref{fig:olsglsval}(a) shows a plot of prediction and confidence intervals for the validation points. The predictions for the {\texttt{SweGrid}} data along with the corresponding standard error are shown in figure \ref{fig:olsresults}\footnote{Figures are placed in the end for comparison puposes.}.
 \begin{figure}[ht]
 \centering
   \subfloat[]{{\includegraphics[width=4.8cm]{ols_valdat_pred_ci.png} }}%
@@ -201,13 +201,13 @@ whose parameters $\btheta = [\kappa, \sigma^2, \nu]$ are estimated using the lea
 \begin{equation*}
 \hat \theta = \arg \min_{\btheta} \sum_{i=1}^n (y_i - \bE(y_i; \theta)).
 \end{equation*}
+The estimated parameters of the Matern covariance function are $\nu = 1.5$, $\kappa = 0.947$ and $\sigma^2 = 0.2614$. Thus, with this parametric model, one is able to calculate a smooth covariance function for any given distance $d$ and hence the covariance matrix $\Sigma$.
 
-Since we now have an estimate of the covariance matrix (from the parametric model), we use the Generalized Least Squares (GLS) to compute a refined estimate of $\bbeta$. The GLS estimate of $\bbeta$ and the corresponding variance is given by
+Since we now have an estimate of the covariance matrix, we use the Generalized Least Squares (GLS) to compute a refined estimate of $\bbeta$. The GLS estimate of $\bbeta$ and the corresponding variance is given by
 \begin{align*}
 & \hat \bbeta = (\bX^T \Sigma^{-1} \bX)^{-1} \bX^T \Sigma^{-1} \bY \\
 & \bV(\bbeta | \sigmaeps^2, \Sigma) = \sigmaeps^2 (\bX^T \Sigma^{-1} \bX)^{-1}
 \end{align*}
-
 With the new estimate of $\bbeta$, we form another set of residuals with which we iterate the above procedure 3 times (the steps are as described in slide 16 of lecture 3). The parameter estimates and the corresponding standard errors are tabulated in Table \ref{tab:glsest}.
 \begin{table}[ht]
 \centering
@@ -234,9 +234,10 @@ Finally, the Kriging estimator for predicting the temperatures at the `unknown' 
 &(\bX_u^T - \bX_k^T \Sigma_{kk}^{-1}\Sigma_{ku})^T ( \bX_k^T \Sigma_{kk}^{-1} \bX_k)^{-1} (\bX_u^T - \bX_k^T \Sigma_{kk}^{-1}\Sigma_{ku})
 \end{split}
 \end{gather*}
+One can form the confidence interval in a similar way as OLS. 
 
-The estimated model parameters are validated using the 25 randomly chosen validation locations. Figure shows a plot of the true and predicted temperatures together with the confidence intervals for the validation locations. A plot of the prediction and standard errors for the predictions of the {\texttt{SweGrid}} data is shown in figure \ref{fig:krigresults}. It is apparent that the predictions from Kriging method has lower variance compared to those from the OLS method.
-
+The estimated model parameters are validated using the 25 randomly chosen validation locations. Figure \ref{fig:olsglsval} (b) shows a plot of the true and predicted temperatures together with the confidence intervals for the validation locations. A plot of the prediction and standard errors for the predictions of the {\texttt{SweGrid}} data is shown in figure \ref{fig:krigresults}. It is apparent that the predictions from Kriging method has lower variance compared to those from the OLS method.
+\pagebreak
 \begin{figure}[ht]
 \centering
   \subfloat[Estimate of average temperature]{{\includegraphics[width=5cm,height=7cm]{pred_ols_grid.png} }}%
