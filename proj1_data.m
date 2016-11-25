@@ -82,6 +82,7 @@ for ii = 1:length(seBeta),
 end
 E = beta_(1) + grid(:,[2,3,5])*beta_(2:end);
 %and fit these into the relevant points
+% test
 mu(Ind) = E;
 %plot
 figure,
