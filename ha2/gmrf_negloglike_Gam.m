@@ -1,7 +1,7 @@
 function negloglike = gmrf_negloglike_Gam(theta, y, AB, C, G, G2, alpha)
 % GMRF_NEGLOGLIKE_GAM Calculate the GMRF data likelihood, non-Gaussian observations
 %
-% negloglike = gmrf_negloglike_Gam(theta, y, AB, C, G, G2, is_CAR)
+% negloglike = gmrf_negloglike_Gam(theta, y, AB, C, G, G2, alpha)
 %
 % theta - log([tau2; kappa; b])
 % y - the data vector, as a column with n elements
@@ -23,7 +23,9 @@ kappa2 = exp(theta(2));
 b = exp(theta(3));
 
 %compute Q for a CAR or SAR process
-Q_x = [];
+if alpha==2
+  Q_x = tau*(kappa2^2*C + 2*kappa2*G + G2);
+end
 
 %combine this Q and Qbeta prior for regression coefficients
 Qbeta = 1e-3 * speye(size(AB,2)-size(Q_x,2));
@@ -38,10 +40,10 @@ if isempty(x_mode)
 end
 
 %nested optimisation to find x_mode using Newton-Raphson optimisation
-x_mode = fminNR(@(x) GMRF_taylor_Gam(x, y, AB, Qall, b), x_mode);
+x_mode = fminNR(@(x) gmrf_taylor_Gam(x, y, AB, Qall, b), x_mode);
 
 %find the Laplace approximation of the denominator
-[f, ~, Q_xy] = GMRF_taylor_Gam(x_mode, y, AB, Qall, b);
+[f, ~, Q_xy] = gmrf_taylor_Gam(x_mode, y, AB, Qall, b);
 %note that f = -log_obs + x_mode'*Q*x_mode/2.
 
 %Compute choleskey factors
@@ -56,7 +58,7 @@ if p_x~=0 || p_xy~=0
 end
 
 %note that f = -log_obs + x_mode'*Q*x_mode/2.
-negloglike = [];
+negloglike = f - x_mode'*Qall*x_mode/2 - sum(log(diag(R_x))) + sum(log(diag(R_xy)));
 
 %print diagnostic information (progress)
 fprintf(1, 'Theta: %11.4e %11.4e %11.4e; fval: %11.4e\n', ...
