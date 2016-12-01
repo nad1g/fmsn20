@@ -1,0 +1,50 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{amsmath,amssymb,graphicx,float,subfig}
+
+%defines
+\def\bY{{\bf Y}}
+\def\bX{{\bf X}}
+\def\bE{{\bf E}}
+\def\bV{{\bf V}}
+\def\bC{{\bf C}}
+\def\b1{{\bf 1}}
+\def\bx{{\bf x}}
+\def\by{{\bf y}}
+\def\btx{{\bf{\tilde x}}}
+\def\blambda{{\boldsymbol \lambda}}
+\def\bgamma{{\boldsymbol \gamma}}
+\def\btheta{{\boldsymbol \theta}}
+\def\bnu{{\boldsymbol \nu}}
+\def\bmu{{\boldsymbol \mu}}
+\def\sigmaeps{{\sigma_{\epsilon}}}
+
+%opening
+\title{Home Assignment - 2}
+\author{Santhosh Nadig}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Theory}
+The data model is given by
+\begin{equation*}
+ p(y_i|z_i) = \frac{y_i^{b-1}}{\Gamma(b)} (be^{-z_i})^b \exp (-by_ie^{-z_i}).
+\end{equation*}
+Thus, the observation log-likelihood $\log p(y_i|z_i)$ can be written as
+\begin{equation*}
+ f(z_i) \triangleq \log p(y_i|z_i) = (b-1) \log y_i - \log \Gamma(b) + b \log (b) - b z_i - b y_i e^{-z_i},
+\end{equation*}
+whose derivatives are
+\begin{align*}
+ f'(z_i) &= -b + b z_i y_i e^{-z_i} \\
+ f''(z_i) &= b y_i e^{-z_i} (1 - z_i) .
+\end{align*}
+
+The log-likelihood function $\log p(\btx|\by)$ can be written as
+
+\section{Conclusions}
+
+\end{document}
