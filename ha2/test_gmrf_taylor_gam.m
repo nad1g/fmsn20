@@ -4,7 +4,7 @@
 
 %load data
 load HA2_Parana.mat
-B = [mesh.loc_obs(:,1) mesh.dist_obs mesh.elevation_obs];
+B = [ones(length(mesh.loc_obs),1) mesh.loc_obs(:,1) mesh.dist_obs mesh.elevation_obs];
 AB = [mesh.A B];
 y = rainfall;
 
@@ -34,4 +34,7 @@ end
 %figure, plot(x_mode); hold on;
 %nested optimisation to find x_mode using Newton-Raphson optimisation
 x_mode = fminNR(@(x) gmrf_taylor_Gam(x, y, AB, Qall, b), x_mode);
+
+y_rec = exp(AB*x_mode);
+figure, plot(y,'bo'); hold on; plot(y_rec,'r-.');
 %plot(x_mode,'r');

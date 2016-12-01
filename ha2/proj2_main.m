@@ -5,9 +5,10 @@
 %load data
 load HA2_Parana.mat
 Y = rainfall;
+Nobs = size(mesh.loc_obs,1);
 
 %matrix of covariates for triangulation and observations
-Bobs = [mesh.loc_obs(:,1) mesh.dist_obs mesh.elevation_obs];
+Bobs = [ones(Nobs,1) mesh.loc_obs(:,1) mesh.dist_obs mesh.elevation_obs];
 %Bmesh = ?
 
 %compute precision matrices for Matern-fields
@@ -18,7 +19,6 @@ ABobs = [mesh.A Bobs];
 %ABall = [speye(size(mesh.loc,1)) Bmesh];
 
 %Pick a validation and an observation set [validation = 10% of observation]
-Nobs = size(mesh.loc_obs,1);
 Iobs = rand(Nobs,1)>.1;
 Ivalid = ~Iobs;
 
@@ -29,6 +29,9 @@ global x_mode;
 %attempt to estimate parameters (optim in optim...)
 theta0 = rand(3,1);
 theta = fminsearch( @(x) gmrf_negloglike_Gam(x, Y(Iobs), ABobs(Iobs,:), C, G, G2, 2), theta0);
-%use the taylor expansion to compute posterior precision
-%[~, ~, Q_xy] = gmrf_taylor_Gam(x_mode, ...);
 
+%use the taylor expansion to compute posterior precision
+[~, ~, Q_xy] = gmrf_taylor_Gam(x_mode, Y(Iobs), AB(Iobs), Qall, b);
+
+e = sparse(size(spde.C,1)+1, 1, 1, size(Q_xy,1),1);
+V_beta0 = e'*(Q_xy\e);

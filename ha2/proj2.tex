@@ -4,11 +4,15 @@
 %defines
 \def\bY{{\bf Y}}
 \def\bX{{\bf X}}
+\def\bH{{\bf H}}
 \def\bE{{\bf E}}
-\def\bV{{\bf V}}
+\def\bQ{{\bf Q}}
+\def\btQ{{\bf \tilde Q}}
 \def\bC{{\bf C}}
+\def\btA{{\bf \tilde A}}
 \def\b1{{\bf 1}}
 \def\bx{{\bf x}}
+\def\bb{{\bf b}}
 \def\by{{\bf y}}
 \def\btx{{\bf{\tilde x}}}
 \def\blambda{{\boldsymbol \lambda}}
@@ -43,7 +47,36 @@ whose derivatives are
  f''(z_i) &= b y_i e^{-z_i} (1 - z_i) .
 \end{align*}
 
-The log-likelihood function $\log p(\btx|\by)$ can be written as
+The log-likelihood function $\log p(\btx|\by, \btheta)$ can be written as
+\begin{align}
+ \log p(\btx|\by, \btheta) &\propto \log p(\by| \btx, \btheta) + \log p(\btx|\btheta) + \mathrm{const.} \nonumber \\
+ &= \sum_i \log p(y_i|z_i, \btheta) + \log p(\btx|\btheta) + \mathrm{const.} \nonumber \\
+ &= \sum_i f(z_i) - \frac{1}{2} \btx^T \bQ \btx  + \mathrm{const.}
+ \label{eq:logpxyt}
+\end{align}
+The Taylor expansion around the mode $\hat \bx^{(0)}$ of the first term $\sum_i f(z_i)$ is given by [slide 29 of lecture 7]
+\begin{equation}
+ \sum_i f(z_i) \approx \mathrm{const.} + \btx^T \btA^T (\nabla f^{(0)} - \bH_f^{(0)} \btA \hat \bx^{(0)}) + \frac{1}{2} \btx^T \btA^T \bH_f^{(0)} \btA \btx
+ \label{eq:taylor}
+\end{equation}
+where $\nabla f^{(0)}$ and $\bH_f^{(0)}$ represent the gradient and Hessian of $f$ at the mode of $\btx$.
+Substituting (\ref{eq:taylor}) in (\ref{eq:logpxyt}), one obtains
+\begin{equation}
+ g(\btx) \triangleq \log p(\btx|\by, \btheta) \approx \btx^T \bb_{x|y} - \frac{1}{2} \btx^T \bQ_{x|y} \btx,
+ \label{eq:gx}
+\end{equation}
+where $\bb_{x|y} = \btA^T (\nabla f^{(0)} - \bH_f^{(0)} \btA \hat \bx^{(0)})$ and $\bQ_{x|y} = \btQ - \btA^T \bH_f^{(0)} \btA$.
+
+Taking the first derivative w.r.t $\btx$ of (\ref{eq:gx}), one obtains
+\begin{align}
+ g'(\btx) &= \btA^T (\nabla f^{(0)} - \bH_f^{(0)} \btA \hat \bx^{(0)}) - (\btQ - \btA^T \bH_f^{(0)} \btA) \btx \nonumber \\
+	  &= \btA^T \nabla f^{(0)} - \btQ \hat \bx^{(0)} \qquad \mathrm{at~} \btx = \hat \bx^{(0)}.
+\end{align}
+The second derivative w.r.t $\btx$ of (\ref{eq:gx}) can simply be written as
+\begin{equation}
+ g''(\btx) = -(\btQ - \btA^T \bH_f^{(0)} \btA).
+\end{equation}
+
 
 \section{Conclusions}
 
