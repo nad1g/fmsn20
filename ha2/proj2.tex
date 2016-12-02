@@ -3,9 +3,12 @@
 
 %defines
 \def\bY{{\bf Y}}
+\def\bA{{\bf A}}
+\def\bB{{\bf B}}
 \def\bX{{\bf X}}
 \def\bH{{\bf H}}
 \def\bE{{\bf E}}
+\def\bG{{\bf G}}
 \def\bQ{{\bf Q}}
 \def\btQ{{\bf \tilde Q}}
 \def\bC{{\bf C}}
@@ -14,10 +17,12 @@
 \def\bx{{\bf x}}
 \def\bb{{\bf b}}
 \def\by{{\bf y}}
+\def\bz{{\bf z}}
 \def\btx{{\bf{\tilde x}}}
 \def\blambda{{\boldsymbol \lambda}}
 \def\bgamma{{\boldsymbol \gamma}}
 \def\btheta{{\boldsymbol \theta}}
+\def\bbeta{{\boldsymbol \beta}}
 \def\bnu{{\boldsymbol \nu}}
 \def\bmu{{\boldsymbol \mu}}
 \def\sigmaeps{{\sigma_{\epsilon}}}
@@ -31,6 +36,38 @@
 \maketitle
 
 \section{Introduction}
+
+
+\section{The Data-Set and Model}
+The data consists of precipitation for the month of June, 2011 for 553 locations in the Parana district of Brazil. In addition, we are given the co-ordinates (latitude, longitude), elevation and distance to the coast are provided. The data is positive (since it is the accumulated precipitation) and the following model is suggested.
+
+\begin{itemize}
+ \item The observations $y_i$ are Gamma distributed
+ \begin{align*}
+  & y_i|z_i \sim \Gamma \left( b , \frac{e^{z_i}}{b}\right) \\
+  & p(y_i|z_i) = \frac{y_i^{b-1}}{\Gamma(b)} \left( b e^{-z_i} \right)^b \exp(b y_i e^{-z_i})
+ \end{align*}
+ The mean $E(y_i|z_i) = e^{z_i}$ and $\log E(y_i|z_i) = z_i$. And, the variance $V(y_i|z_i) = e^{2z_i}/b$.
+ 
+ \item The log-expectation of the observations $\bz$ is modeled as 
+ \begin{align*}
+  & \bz = \bA \bx + \bB \bbeta = \btA \btx.
+ \end{align*}
+ where $\bA$ is the observation matrix, $\bB$ is a matrix of covariates and
+ \begin{align*}
+  &\btx = \begin{bmatrix}
+          \bx \\
+          \bbeta
+         \end{bmatrix} \sim
+         N\left( 0, \begin{bmatrix}
+                     \bQ & 0 \\
+                     0 & \mathbb{I} \cdot 10^{-3}
+                    \end{bmatrix}^{-1}
+ \right)
+ \end{align*}
+ \item A suitable model for $\bQ$ is a SAR model: $\bQ = \tau (\kappa^4 \bC + 2\kappa^2 \bG + \bG_2)$ with parameters $\theta_1 = \log (\tau)$,  $\theta_2 = \log (\kappa^2)$  and $\theta_3 = \log(b)$.
+\end{itemize}
+
 
 \section{Theory}
 The data model is given by
