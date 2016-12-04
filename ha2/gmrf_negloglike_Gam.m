@@ -58,7 +58,6 @@ if p_x~=0 || p_xy~=0
 end
 
 %note that f = -log_obs + x_mode'*Q*x_mode/2.
-%negloglike = f - x_mode'*Qall*x_mode/2 - sum(log(diag(R_x))) + sum(log(diag(R_xy)));
 negloglike = f - sum(log(diag(R_x))) + sum(log(diag(R_xy)));
 %print diagnostic information (progress)
 fprintf(1, 'Theta: %11.4e %11.4e %11.4e; fval: %11.4e\n', ...

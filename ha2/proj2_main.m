@@ -31,7 +31,42 @@ theta0 = rand(3,1);
 theta = fminsearch( @(x) gmrf_negloglike_Gam(x, Y(Iobs), ABobs(Iobs,:), C, G, G2, 2), theta0);
 
 %use the taylor expansion to compute posterior precision
-[~, ~, Q_xy] = gmrf_taylor_Gam(x_mode, Y(Iobs), AB(Iobs), Qall, b);
+[~, ~, Q_xy] = gmrf_taylor_Gam(x_mode, Y(Iobs), ABobs(Iobs,:), Qall, b);
 
-e = sparse(size(spde.C,1)+1, 1, 1, size(Q_xy,1),1);
-V_beta0 = e'*(Q_xy\e);
+
+%ordinary regression (OLS)
+[beta_,resid,sigma2,Sigma]= ols(Bobs(Iobs,:),log(Y(Iobs)));
+
+for ii = 1:length(beta_)
+   fprintf('beta(%d) = %1.4f\t SE=%1.4f\n', ii,beta_(ii), sqrt(Sigma(ii,ii)));
+end
+Y_ols = exp(Bobs(Ivalid,:)*beta_);
+V_Y_ols = exp(sum((Bobs(Ivalid,:)*Sigma).*Bobs(Ivalid,:),2));
+
+figure, plot(Y(Ivalid),'k-*');
+hold on;
+plot(Y_ols,'r--o');
+plot(Y_ols - 1.96*sqrt(V_Y_ols+sigma2),'b--');
+plot(Y_ols + 1.96*sqrt(V_Y_ols+sigma2),'b--');
+xlabel('Location')
+ylabel('Estimated precipitation')
+title('OLS')
+
+%compare it to GMRF
+Y_gmrf = exp(ABobs(Ivalid,:)*x_mode);
+%for conf intervals, sample from Q_xy
+R_xy = chol(Q_xy);
+z = randn(size(R_xy,1),100);
+v = R_xy\z; v = v(Ivalid,:);
+vvar = var(v'); vvar = vvar(:);
+
+figure, plot(Y(Ivalid),'k-*');
+hold on;
+plot(Y_gmrf,'r--o');
+plot(Y_gmrf - 1.96*sqrt(vvar+sigma2),'b--');
+plot(Y_gmrf + 1.96*sqrt(vvar+sigma2),'b--');
+xlabel('Location')
+ylabel('Estimated precipitation')
+title('GMRF')
+
+

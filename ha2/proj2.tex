@@ -70,6 +70,7 @@ The data consists of precipitation for the month of June, 2011 for 553 locations
 
 
 \section{Theory}
+\subsection{Observation Log-Likelihood}
 The data model is given by
 \begin{equation*}
  p(y_i|z_i) = \frac{y_i^{b-1}}{\Gamma(b)} (be^{-z_i})^b \exp (-by_ie^{-z_i}).
@@ -84,6 +85,7 @@ whose derivatives are
  f''(z_i) &= b y_i e^{-z_i} (1 - z_i) .
 \end{align*}
 
+\subsection{Log-likelihood $\log p(\btx|\by, \btheta)$}
 The log-likelihood function $\log p(\btx|\by, \btheta)$ can be written as
 \begin{align}
  \log p(\btx|\by, \btheta) &\propto \log p(\by| \btx, \btheta) + \log p(\btx|\btheta) + \mathrm{const.} \nonumber \\
@@ -114,6 +116,46 @@ The second derivative w.r.t $\btx$ of (\ref{eq:gx}) can simply be written as
  g''(\btx) = -(\btQ - \btA^T \bH_f^{(0)} \btA).
 \end{equation}
 
+\subsection{Estimation}
+
+Firstly, approximately 10\% of the observation data is set aside for validation. We then proceed with ordinary regression which begins with the selection of covariates.
+Figure~ shows a scatter-plot of the log of the observations versus the covariates. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lp{9cm}}
+\hline
+{\bf Model} & {\bf Covariates} \\
+\hline
+ A & Latitude, longitude, distance to coast, elevation\\
+ * B & Latitude, distance to coast, elevation\\
+ C & Distance to coast, elevation\\
+ D & Longitude, distance to coast\\
+ E & Longitude, elevation\\
+\hline
+\end{tabular}
+\caption{Models and the respective covariates, with log precipitation as the independent varible.}
+\label{tab:models}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+  \subfloat[]{{\includegraphics[width=5cm, height=5cm]{AIC_mm.png} }}%
+  \qquad
+  \subfloat[]{{\includegraphics[width=5cm, height=5cm]{SE_Resid_mm.png} }}%
+  \caption{(a): AIC (b): SE of residuals.}
+\label{fig:olsglsval}
+\end{figure}
+
+
+\begin{verbatim}
+beta(1) = -10.3226	 SE=1.8154
+beta(2) = -0.2325	 SE=0.0379
+beta(3) = -0.2202	 SE=0.0393
+beta(4) = 0.0006	 SE=0.0001
+
+sigma2 = 0.1069
+\end{verbatim}
 
 \section{Conclusions}
 
