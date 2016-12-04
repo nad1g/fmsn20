@@ -16,6 +16,7 @@
 \def\b1{{\bf 1}}
 \def\bx{{\bf x}}
 \def\bb{{\bf b}}
+\def\be{{\bf e}}
 \def\by{{\bf y}}
 \def\bz{{\bf z}}
 \def\btx{{\bf{\tilde x}}}
@@ -116,11 +117,16 @@ The second derivative w.r.t $\btx$ of (\ref{eq:gx}) can simply be written as
  g''(\btx) = -(\btQ - \btA^T \bH_f^{(0)} \btA).
 \end{equation}
 
-\subsection{Estimation}
+\section{Estimation}
+The observations are divided into estimation and validation data-sets wherein approximately 10\% of the observations are set aside for validation.
+\subsection{Ordinary Least Squares}
+The model for ordinary least squares is given by
+\begin{equation*}
+ \bz = \bB \bbeta + \be
+\end{equation*}
+where $\bB$ represents the matrix of covariates, $\bbeta$ the vector of coefficients and $\be \sim N(0,\sigmaeps^2)$.
 
-Firstly, approximately 10\% of the observation data is set aside for validation. We then proceed with ordinary regression which begins with the selection of covariates.
-Figure~ shows a scatter-plot of the log of the observations versus the covariates. 
-
+The first step is to select a suitable set of covariates. Towards this end, a set of models tabulated in table \ref{tab:models} is explored.
 \begin{table}[H]
 \centering
 \begin{tabular}{lp{9cm}}
@@ -147,15 +153,38 @@ Figure~ shows a scatter-plot of the log of the observations versus the covariate
 \label{fig:olsglsval}
 \end{figure}
 
+The OLS estimate for the validation locations, along with the 95\% confidence intervals are plotted in figure~.
 
 \begin{verbatim}
-beta(1) = -10.3226	 SE=1.8154
-beta(2) = -0.2325	 SE=0.0379
-beta(3) = -0.2202	 SE=0.0393
+beta(1) = -10.8703	 SE=1.9788
+beta(2) = -0.2430	 SE=0.0413
+beta(3) = -0.2234	 SE=0.0429
 beta(4) = 0.0006	 SE=0.0001
 
 sigma2 = 0.1069
+
+theta =
+
+    0.5522
+    0.0205
+    2.5509
+
+exp(theta)
+
+ans =
+
+    1.7370
+    1.0207
+   12.8187
 \end{verbatim}
+
+\subsection{Gaussian Markov Random Field (GMRF)}
+Model is as described in section .
+
+We begin by estimating the parameters. The parameter estimates are obtained by maximizing the posterior $p(\btheta|\by)$. That is,
+\begin{equation*}
+ \hat \btheta = \arg\max_{\btheta} \, p(\btheta|\by)
+\end{equation*}
 
 \section{Conclusions}
 

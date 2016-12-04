@@ -6,17 +6,18 @@
 load HA2_Parana.mat
 Y = rainfall;
 Nobs = size(mesh.loc_obs,1);
+Nmesh = size(mesh.loc,1);
 
 %matrix of covariates for triangulation and observations
 Bobs = [ones(Nobs,1) mesh.loc_obs(:,1) mesh.dist_obs mesh.elevation_obs];
-%Bmesh = ?
+Bmesh = [ones(Nmesh,1) mesh.loc(:,1) mesh.dist mesh.elevation];
 
 %compute precision matrices for Matern-fields
 [C, G, G2] = matern_prec_matrices(mesh.loc, mesh.T);
 
 %create the A_tilde matrices
 ABobs = [mesh.A Bobs];
-%ABall = [speye(size(mesh.loc,1)) Bmesh];
+ABall = [speye(size(mesh.loc,1)) Bmesh];
 
 %Pick a validation and an observation set [validation = 10% of observation]
 Iobs = rand(Nobs,1)>.1;
@@ -29,8 +30,25 @@ global x_mode;
 %attempt to estimate parameters (optim in optim...)
 theta0 = rand(3,1);
 theta = fminsearch( @(x) gmrf_negloglike_Gam(x, Y(Iobs), ABobs(Iobs,:), C, G, G2, 2), theta0);
+disp('theta')
+theta
+disp('exp(theta)')
+exp(theta)
+H = gmrf_param_hessian(@(th) gmrf_negloglike_Gam(th,Y(Iobs),ABobs(Iobs,:),C, G, G2, 2), theta0);
+Hinv = inv(H);
+th_se = sqrt(diag(Hinv));
+disp('SE(exp(theta))');
+exp(th_se)
 
 %use the taylor expansion to compute posterior precision
+%extract parameters
+tau = exp(theta(1));
+kappa2 = exp(theta(2));
+b = exp(theta(3));
+Q_x = tau*(kappa2^2*C + 2*kappa2*G + G2);
+%combine this Q and Qbeta prior for regression coefficients
+Qbeta = 1e-3 * speye(size(ABobs,2)-size(Q_x,2));
+Qall = blkdiag(Q_x, Qbeta);
 [~, ~, Q_xy] = gmrf_taylor_Gam(x_mode, Y(Iobs), ABobs(Iobs,:), Qall, b);
 
 
@@ -57,16 +75,32 @@ Y_gmrf = exp(ABobs(Ivalid,:)*x_mode);
 %for conf intervals, sample from Q_xy
 R_xy = chol(Q_xy);
 z = randn(size(R_xy,1),100);
-v = R_xy\z; v = v(Ivalid,:);
-vvar = var(v'); vvar = vvar(:);
+v = R_xy\z;
+vvar = var(v'); vvalid = vvar(Ivalid)';
 
 figure, plot(Y(Ivalid),'k-*');
 hold on;
 plot(Y_gmrf,'r--o');
-plot(Y_gmrf - 1.96*sqrt(vvar+sigma2),'b--');
-plot(Y_gmrf + 1.96*sqrt(vvar+sigma2),'b--');
+plot(Y_gmrf - 1.96*sqrt(vvalid+sigma2),'b--');
+plot(Y_gmrf + 1.96*sqrt(vvalid+sigma2),'b--');
 xlabel('Location')
 ylabel('Estimated precipitation')
 title('GMRF')
 
+Y_mesh_gmrf = exp(ABall*x_mode);
+%plot the mesh predictions and standard error.
+figure,
+scatter(mesh.loc(:,1), mesh.loc(:,2), 15, Y_mesh_gmrf, ..., 
+    'filled', 'markeredgecolor', 'k')
+hold on
+plot(Border(:,1),Border(:,2),'-',...
+  Border(1034:1078,1),Border(1034:1078,2),'-')
+colorbar; hold off; axis tight
 
+figure,
+scatter(mesh.loc(:,1), mesh.loc(:,2), 15, sqrt(vvar(1:end-4)'+sigma2), ..., 
+    'filled', 'markeredgecolor', 'k')
+hold on
+plot(Border(:,1),Border(:,2),'-',...
+  Border(1034:1078,1),Border(1034:1078,2),'-')
+colorbar; hold off; axis tight
