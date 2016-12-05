@@ -64,33 +64,37 @@ V_Y_ols = exp(sum((Bobs(Ivalid,:)*Sigma).*Bobs(Ivalid,:),2));
 figure, plot(Y(Ivalid),'k-*');
 hold on;
 plot(Y_ols,'r--o');
-plot(Y_ols - 1.96*sqrt(V_Y_ols+sigma2),'b--');
-plot(Y_ols + 1.96*sqrt(V_Y_ols+sigma2),'b--');
+plot(Y_ols - 1.96*sqrt(V_Y_ols),'b--');
+plot(Y_ols + 1.96*sqrt(V_Y_ols),'b--');
 xlabel('Location')
 ylabel('Estimated precipitation')
 title('OLS')
 
 %compare it to GMRF
-Y_gmrf = exp(ABobs(Ivalid,:)*x_mode);
 %for conf intervals, sample from Q_xy
 R_xy = chol(Q_xy);
 z = randn(size(R_xy,1),100);
 v = R_xy\z;
-vvar = var(v'); vvalid = vvar(Ivalid)';
+Y_gmrf = exp(ABobs*(repmat(x_mode,1,100)+v));
+Y_gmrf_mean = mean(Y_gmrf,2);
+Y_gmrf_se = std(Y_gmrf,0,2);
 
 figure, plot(Y(Ivalid),'k-*');
 hold on;
-plot(Y_gmrf,'r--o');
-plot(Y_gmrf - 1.96*sqrt(vvalid+sigma2),'b--');
-plot(Y_gmrf + 1.96*sqrt(vvalid+sigma2),'b--');
+plot(Y_gmrf_mean(Ivalid),'r--o');
+plot(Y_gmrf_mean(Ivalid) - 1.96*Y_gmrf_se(Ivalid),'b--');
+plot(Y_gmrf_mean(Ivalid) + 1.96*Y_gmrf_se(Ivalid),'b--');
 xlabel('Location')
 ylabel('Estimated precipitation')
 title('GMRF')
 
-Y_mesh_gmrf = exp(ABall*x_mode);
+%calculate mean precipitation for mesh locations
+Y_mesh_gmrf = exp(ABall*(repmat(x_mode,1,100)+v));
+Y_mesh_gmrf_mean = mean(Y_mesh_gmrf,2);
+Y_mesh_gmrf_se = std(Y_mesh_gmrf,0,2);
 %plot the mesh predictions and standard error.
 figure,
-scatter(mesh.loc(:,1), mesh.loc(:,2), 15, Y_mesh_gmrf, ..., 
+scatter(mesh.loc(:,1), mesh.loc(:,2), 15, Y_mesh_gmrf_mean, ..., 
     'filled', 'markeredgecolor', 'k')
 hold on
 plot(Border(:,1),Border(:,2),'-',...
@@ -98,7 +102,29 @@ plot(Border(:,1),Border(:,2),'-',...
 colorbar; hold off; axis tight
 
 figure,
-scatter(mesh.loc(:,1), mesh.loc(:,2), 15, sqrt(vvar(1:end-4)'+sigma2), ..., 
+scatter(mesh.loc(:,1), mesh.loc(:,2), 15, Y_mesh_gmrf_se, ..., 
+    'filled', 'markeredgecolor', 'k')
+hold on
+plot(Border(:,1),Border(:,2),'-',...
+  Border(1034:1078,1),Border(1034:1078,2),'-')
+colorbar; hold off; axis tight
+
+%simulate x_mode from p(x|y,theta) (Gaussian approx) N(0,Q_xy^-1)
+x_mode_sim = repmat(x_mode,1,100) + v;
+zz = exp(ABall*x_mode_sim);
+sim_y = gamrnd(b,zz/b);
+var_sim_y = var(sim_y,0,2);
+median_sim_y = median(sim_y,2);
+
+figure,
+scatter(mesh.loc(:,1), mesh.loc(:,2), 15, median_sim_y, ..., 
+    'filled', 'markeredgecolor', 'k')
+hold on
+plot(Border(:,1),Border(:,2),'-',...
+  Border(1034:1078,1),Border(1034:1078,2),'-')
+colorbar; hold off; axis tight
+figure,
+scatter(mesh.loc(:,1), mesh.loc(:,2), 15, sqrt(var_sim_y), ..., 
     'filled', 'markeredgecolor', 'k')
 hold on
 plot(Border(:,1),Border(:,2),'-',...

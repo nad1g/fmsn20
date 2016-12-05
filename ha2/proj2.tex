@@ -28,6 +28,9 @@
 \def\bnu{{\boldsymbol \nu}}
 \def\bmu{{\boldsymbol \mu}}
 \def\sigmaeps{{\sigma_{\epsilon}}}
+\def\bxmode{{\hat \bx^{(0)}}}
+\def\txmode{{\tilde \bx_{\mathrm{mode}}}}
+\def\txsample{{\tilde \bx_{\mathrm{sample}}}}
 
 %opening
 \title{Home Assignment - 2}
@@ -41,6 +44,7 @@
 
 
 \section{The Data-Set and Model}
+\label{sec:model}
 The data consists of precipitation for the month of June, 2011 for 553 locations in the Parana district of Brazil. In addition, we are given the co-ordinates (latitude, longitude), elevation and distance to the coast are provided. The data is positive (since it is the accumulated precipitation) and the following model is suggested.
 
 \begin{itemize}
@@ -74,9 +78,10 @@ The data consists of precipitation for the month of June, 2011 for 553 locations
 \section{Theory}
 \subsection{Observation Log-Likelihood}
 The data model is given by
-\begin{equation*}
+\begin{equation}
  p(y_i|z_i) = \frac{y_i^{b-1}}{\Gamma(b)} (be^{-z_i})^b \exp (-by_ie^{-z_i}).
-\end{equation*}
+ \label{eq:datamodel}
+\end{equation}
 Thus, the observation log-likelihood $\log p(y_i|z_i)$ can be written as
 \begin{equation*}
  f(z_i) \triangleq \log p(y_i|z_i) = (b-1) \log y_i - \log \Gamma(b) + b \log (b) - b z_i - b y_i e^{-z_i},
@@ -117,6 +122,13 @@ The second derivative w.r.t $\btx$ of (\ref{eq:gx}) can simply be written as
 \begin{equation}
  g''(\btx) = -(\btQ - \btA^T \bH_f^{(0)} \btA).
 \end{equation}
+
+Furthermore, comparing equation (\ref{eq:gx}) to a canonical multivariate Gaussian log-likelihood function, the Gaussian approximation of $p(\btx|\by, \btheta)$ [slide 32 of lecture 7] can be obtained as,
+\begin{align}
+ p_G(\btx|\by, \btheta) &\stackrel{\in}{\sim} N(\bmu_{x|y}, \bQ_{x|y}^{-1}) \nonumber \\
+ \bmu_{x|y} &= \bQ_{x|y}^{-1} \bb_{x|y}
+ \label{eq:pxygauss}
+\end{align}
 
 \section{Estimation}
 The observations are divided into estimation and validation data-sets wherein approximately 10\% of the observations are set aside for validation.
@@ -172,49 +184,21 @@ $\hat \beta_3$ & 0.0006 & 0.0001 \\
 \label{tab:olsparest}
 \end{table}
 
-The OLS estimate of the precipitation at the validation locations is simply given by $\hat \by_v = \exp \left( \bB_v \hat \bbeta \right)$, where $\bB_v$ is the covariate matrix for the validation locations. Furthermore, the variance of the estimates is given by $\bV(\hat \by_v) = \sigmaeps^2 (\bB_v (\bB_v^T\bB_v)^{-1} \bB_v^T + 1)$. The 95\% confidence intervals (Gaussian) are given by $\hat \by_v \pm 1.96 \left( \bV(\hat \by_v) \right)^{1/2}$.
+The OLS estimate of the expected value of precipitation at the validation locations is simply given by $\bE(\hat \by_v) = \hat \bmu_v = \exp \left( \bB_v \hat \bbeta \right)$, where $\bB_v$ is the covariate matrix for the validation locations. Furthermore, the variance of the expected precipitation is given by $\bV(\hat \bmu_v) = \sigmaeps^2 (\bB_v (\bB_v^T\bB_v)^{-1} \bB_v^T)$. The 95\% confidence intervals (Gaussian) are given by $\hat \bmu_v \pm 1.96 \left( \bV(\hat \bmu_v) \right)^{1/2}$.
 
 The OLS estimate for the validation locations, along with the 95\% confidence intervals are plotted in figure~\ref{fig:valid} (a).
 \begin{figure}[ht]
 \centering
-  \subfloat[]{{\includegraphics[width=5cm, height=5cm]{ols_valid.png} }}%
+  \subfloat[]{{\includegraphics[width=5cm, height=4.5cm]{ols_valid.png} }}%
   \qquad
-  \subfloat[]{{\includegraphics[width=5cm, height=5cm]{gmrf_valid.png} }}%
-  \caption{(a): OLS estimate of precipitation at the validation locations. Black: Truth, Red: OLS estimate, Blue: 95\% confidence intervals. (b): GMRF estimate of precipitation at the validation locations. Black: Truth, Red: OLS estimate, Blue: 95\% confidence intervals.}
+  \subfloat[]{{\includegraphics[width=5cm, height=4.5cm]{gmrf_valid.png} }}%
+  \caption{(a): OLS estimate of expected precipitation at the validation locations. (b): GMRF estimate of precipitation at the validation locations.\\ Black: Truth, Red: estimate of expected precipitation, Blue: 95\% confidence intervals.}
 \label{fig:valid}
 \end{figure}
 
-\begin{verbatim}
-
-sigma2 = 0.1069
-
-theta =
-
-    0.5522
-    0.0205
-    2.5509
-
-exp(theta)
-
-ans =
-
-    1.7370
-    1.0207
-   12.8187
-   
->> th_se
-
-th_se =
-
-    1.0012
-    1.0004
-    1.0003
-\end{verbatim}
-
 \subsection{Gaussian Markov Random Field (GMRF)}
-Model is as described in section .
 
-We begin by estimating the parameters. The parameter estimates are obtained by maximizing the posterior $p(\btheta|\by)$. That is,
+We begin by estimatating the parameters of the GMRF model described in section \ref{sec:model} for which we require the posterior $p(\btheta|\by)$. The parameter estimates are obtained as,
 \begin{equation*}
  \hat \btheta = \arg\max_{\btheta} \, p(\btheta|\by)
 \end{equation*}
@@ -223,14 +207,57 @@ Since we assume $p(\btheta) \propto 1$ (``flat-prior''), we may express the post
  p(\btheta|\by) \propto p(\by|\btheta) &= \frac{p(\by|\btx, \btheta) p(\btx|\btheta)}{p(\btx|\by, \btheta)} \\
  &= \frac{p(\by|\btx, \btheta) p(\btx|\btheta)}{p_G(\btx|\by, \btheta)}
 \end{align*}
+where $p_G(\btx|\by, \btheta)$ is the Gaussian approximation given by equation (\ref{eq:pxygauss}), and $p(\by|\btx, \btheta)$ is given by the data model of equation (\ref{eq:datamodel})
+\begin{equation*}
+ p(\btx|\btheta) \propto |\bQ|^{1/2} \exp \left(-\frac{1}{2} \btx^T \bQ \btx \right).
+\end{equation*}
+We are interested in a good approximation around the most likely values of the posterior distribution [slide 33, lecture 7], which is the mode $\hat \bx^{(0)}$. We note that by picking $\btx = \bxmode$, the log-posterior can be written as
+\begin{equation}
+ \log p(\btheta|\by) = \sum_i f(z_i) + \frac{1}{2} \log\left( |\bQ| \right) - \frac{1}{2} \hat \bx^{(0)^T} \bQ \bxmode - \frac{1}{2} \log |\bQ_{x|y}|
+ \label{eq:logpost}
+\end{equation}
+The parameter estimates $\hat \btheta$ are obtained by maximizing the log-posterior (\ref{eq:logpost}) (or by minimizing the negative log-posterior). The variance of the estimated parameters are given by the diagonal elements of the negative inverse Hessian ($\bf H^{-1}$) of the log-likelihood (same as log-posterior in our case). The obtained estimates and standard errors are tabulated in table \ref{tab:gmrfparest}.	
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\hline
+{\bf $\hat \btheta$} & {$\exp(\hat \btheta)$} & {\bf SE} (of $\exp(\hat \theta)$) \\
+\hline
+$\hat \theta_1 =  0.8585$ & $\hat \tau = 2.3595 $ & 1.0017 \\
+$\hat \theta_2 = -1.3448$ & $\hat \kappa^2 = 0.2606 $ &  1.0006 \\
+$\hat \theta_3 = 2.6496$ & $\hat b = 14.1485$ & 1.0005 \\
+\hline
+\end{tabular}
+\caption{GMRF parameter estimate and standard errors.}
+\label{tab:gmrfparest}
+\end{table}
 
+The reconstruction of the latent field ($\txmode$) is extracted at the last iteration of the maximization of the log-likelihood (minmization of the negative log-likelihood). The expected precipitation at the validation locations is given by $\bE(\hat \by_v) = \exp(\btA_v \txmode)$. The variance (and the standard error, SE) of the latent field (log precipitation) is calculated by simulating (100 times) from a Gaussian distribution with precision matrix $\bQ_{x|y}$. The following steps are used to achieve this:
+\begin{enumerate}
+ \item Compute the Cholesky-factorization $\bQ_{x|y} = R\cdot R^T$.
+ \item Sample $z \in N(0,\mathbb{I})$.
+ \item Solve for $v$ such that $R^T v = z$. Then, $v \in N(0,\bQ_{x|y}^{-1})$.
+\end{enumerate} 
+For the validation locations, the expected precipitation and the corresponding confidence intervals are plotted in figure~\ref{fig:valid} (b).
+
+The same procedure is applied to determine the mean precipitation at all the locations in the mesh (2884 locations). The estimated mean precipitation and the corresponding standard error are plotted in figure~\ref{fig:mesh}
 \begin{figure}[ht]
 \centering
-  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{mesh_pred.png} }}%
+  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{mesh_mean_obs.png} }}%
   \qquad
-  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{mesh_se.png} }}%
-  \caption{(a): Prediction (mesh), (b): SE of predictions.}
+  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{mesh_mean_obs_se.png} }}%
+  \caption{(a): Mean precipitation for mesh locations. (b): SE of mean precipitation for mesh locations.}
 \label{fig:mesh}
+\end{figure}
+
+To construct the uncertainty for the predictions however, we sample $\txsample$ from the Gaussian approximation of its posterior $p_G(\btx|\by, \btheta)$. The precipitation observations are sampled 100 times according to the data model as $\Gamma(b, b^{-1} \exp(\btA \txsample))$. The median precipitation and the standard error are plotted in figure \ref{fig:meshpred}.
+\begin{figure}[ht]
+\centering
+  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{median_sim_y.png} }}%
+  \qquad
+  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{se_sim_y.png} }}%
+  \caption{(a): Median precipitation (prediction). (b): SE of the predictions.}
+\label{fig:meshpred}
 \end{figure}
 \section{Conclusions}
 
