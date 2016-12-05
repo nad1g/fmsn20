@@ -88,6 +88,14 @@ xlabel('Location')
 ylabel('Estimated precipitation')
 title('GMRF')
 
+lgp = ABall*x_mode;
+figure,
+scatter(mesh.loc(:,1), mesh.loc(:,2), 15, lgp, ..., 
+    'filled', 'markeredgecolor', 'k')
+hold on
+plot(Border(:,1),Border(:,2),'-',...
+  Border(1034:1078,1),Border(1034:1078,2),'-')
+colorbar; hold off; axis tight
 %calculate mean precipitation for mesh locations
 Y_mesh_gmrf = exp(ABall*(repmat(x_mode,1,100)+v));
 Y_mesh_gmrf_mean = mean(Y_mesh_gmrf,2);
@@ -111,6 +119,23 @@ colorbar; hold off; axis tight
 
 %simulate x_mode from p(x|y,theta) (Gaussian approx) N(0,Q_xy^-1)
 x_mode_sim = repmat(x_mode,1,100) + v;
+
+%covariates
+b1 = x_mode_sim(end-4,:);
+b1 = x_mode_sim(end-3,:);
+b2 = x_mode_sim(end-2,:);
+b3 = x_mode_sim(end-1,:);
+b4 = x_mode_sim(end,:);
+figure
+subplot(221)
+hist(b1)
+subplot(222)
+hist(b2)
+subplot(223)
+hist(b3)
+subplot(224)
+hist(b4)
+
 zz = exp(ABall*x_mode_sim);
 sim_y = gamrnd(b,zz/b);
 var_sim_y = var(sim_y,0,2);
