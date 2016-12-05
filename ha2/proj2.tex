@@ -9,6 +9,7 @@
 \def\bH{{\bf H}}
 \def\bE{{\bf E}}
 \def\bG{{\bf G}}
+\def\bV{{\bf V}}
 \def\bQ{{\bf Q}}
 \def\btQ{{\bf \tilde Q}}
 \def\bC{{\bf C}}
@@ -126,7 +127,7 @@ The model for ordinary least squares is given by
 \end{equation*}
 where $\bB$ represents the matrix of covariates, $\bbeta$ the vector of coefficients and $\be \sim N(0,\sigmaeps^2)$.
 
-The first step is to select a suitable set of covariates. Towards this end, a set of models tabulated in table \ref{tab:models} is explored.
+The first step is to select a suitable set of covariates. Towards this end, a set of models tabulated in table \ref{tab:models} are explored.
 \begin{table}[H]
 \centering
 \begin{tabular}{lp{9cm}}
@@ -144,22 +145,46 @@ The first step is to select a suitable set of covariates. Towards this end, a se
 \label{tab:models}
 \end{table}
 
+The standard error of the residuals and Akaike Information Criterion (AIC) for the models are shown in figure \ref{fig:aicse}. Clearly, model B is the best choice. Thus, the covariates include an intercept ($\beta_0$), latitude, distance to coast and elevation.
 \begin{figure}[ht]
 \centering
   \subfloat[]{{\includegraphics[width=5cm, height=5cm]{AIC_mm.png} }}%
   \qquad
   \subfloat[]{{\includegraphics[width=5cm, height=5cm]{SE_Resid_mm.png} }}%
   \caption{(a): AIC (b): SE of residuals.}
-\label{fig:olsglsval}
+\label{fig:aicse}
 \end{figure}
 
-The OLS estimate for the validation locations, along with the 95\% confidence intervals are plotted in figure~.
+The estimated parameters $\hat \bbeta$ and their corresponding standard errors tabulated in table~\ref{tab:olsparest}. The estimated noise variance was $\sigmaeps^2 = 0.1069$.
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\hline
+{\bf Parameter} & {\bf Estimate} & {\bf SE} \\
+\hline
+$\hat \beta_0$ & -10.8703 & 1.9788 \\
+$\hat \beta_1$ & -0.2430 & 0.0413 \\
+$\hat \beta_2$ & -0.2234 & 0.0429 \\
+$\hat \beta_3$ & 0.0006 & 0.0001 \\
+\hline
+\end{tabular}
+\caption{OLS parameter estimate and standard errors.}
+\label{tab:olsparest}
+\end{table}
+
+The OLS estimate of the precipitation at the validation locations is simply given by $\hat \by_v = \exp \left( \bB_v \hat \bbeta \right)$, where $\bB_v$ is the covariate matrix for the validation locations. Furthermore, the variance of the estimates is given by $\bV(\hat \by_v) = \sigmaeps^2 (\bB_v (\bB_v^T\bB_v)^{-1} \bB_v^T + 1)$. The 95\% confidence intervals (Gaussian) are given by $\hat \by_v \pm 1.96 \left( \bV(\hat \by_v) \right)^{1/2}$.
+
+The OLS estimate for the validation locations, along with the 95\% confidence intervals are plotted in figure~\ref{fig:valid} (a).
+\begin{figure}[ht]
+\centering
+  \subfloat[]{{\includegraphics[width=5cm, height=5cm]{ols_valid.png} }}%
+  \qquad
+  \subfloat[]{{\includegraphics[width=5cm, height=5cm]{gmrf_valid.png} }}%
+  \caption{(a): OLS estimate of precipitation at the validation locations. Black: Truth, Red: OLS estimate, Blue: 95\% confidence intervals. (b): GMRF estimate of precipitation at the validation locations. Black: Truth, Red: OLS estimate, Blue: 95\% confidence intervals.}
+\label{fig:valid}
+\end{figure}
 
 \begin{verbatim}
-beta(1) = -10.8703	 SE=1.9788
-beta(2) = -0.2430	 SE=0.0413
-beta(3) = -0.2234	 SE=0.0429
-beta(4) = 0.0006	 SE=0.0001
 
 sigma2 = 0.1069
 
@@ -193,7 +218,20 @@ We begin by estimating the parameters. The parameter estimates are obtained by m
 \begin{equation*}
  \hat \btheta = \arg\max_{\btheta} \, p(\btheta|\by)
 \end{equation*}
+Since we assume $p(\btheta) \propto 1$ (``flat-prior''), we may express the posterior as
+\begin{align*}
+ p(\btheta|\by) \propto p(\by|\btheta) &= \frac{p(\by|\btx, \btheta) p(\btx|\btheta)}{p(\btx|\by, \btheta)} \\
+ &= \frac{p(\by|\btx, \btheta) p(\btx|\btheta)}{p_G(\btx|\by, \btheta)}
+\end{align*}
 
+\begin{figure}[ht]
+\centering
+  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{mesh_pred.png} }}%
+  \qquad
+  \subfloat[]{{\includegraphics[width=5cm, height=4cm]{mesh_se.png} }}%
+  \caption{(a): Prediction (mesh), (b): SE of predictions.}
+\label{fig:mesh}
+\end{figure}
 \section{Conclusions}
 
 \end{document}
