@@ -238,7 +238,14 @@ The reconstruction of the latent field ($\txmode$) is extracted at the last iter
  \item Sample $z \in N(0,\mathbb{I})$.
  \item Solve for $v$ such that $R^T v = z$. Then, $v \in N(0,\bQ_{x|y}^{-1})$.
 \end{enumerate} 
-For the validation locations, the expected precipitation and the corresponding confidence intervals are plotted in figure~\ref{fig:valid} (b).
+For the validation locations, the expected precipitation and the corresponding confidence intervals are plotted in figure~\ref{fig:valid} (b). In addition, we also obtain posterior samples for the regression co-efficients $\bbeta$. These are plotted in figure~\ref{fig:covariates}. The median covariate values were found to be -30.1573, -0.6476, -0.6478 and 0.0005 respectively. One can see that the intercept has a very high variance and also that elevation does not contribute much to the regression.
+\begin{figure}[ht]
+ \centering
+ \includegraphics[width=0.8\linewidth]{covariates.png}
+ \caption{Histograms of the covariates (intercept, Longitude, Distance to coast and elevation [top-left to bottom right].}
+ \label{fig:covariates}
+\end{figure}
+
 
 The same procedure is applied to determine the mean precipitation at all the locations in the mesh (2884 locations). The estimated mean precipitation and the corresponding standard error are plotted in figure~\ref{fig:mesh}
 \begin{figure}[ht]
@@ -251,7 +258,7 @@ The same procedure is applied to determine the mean precipitation at all the loc
 \end{figure}
 
 To construct the uncertainty for the predictions however, we sample $\txsample$ from the Gaussian approximation of its posterior $p_G(\btx|\by, \btheta)$. The precipitation observations are sampled 100 times according to the data model as $\Gamma(b, b^{-1} \exp(\btA \txsample))$. The median precipitation and the standard error are plotted in figure \ref{fig:meshpred}.
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
   \subfloat[]{{\includegraphics[width=5cm, height=4cm]{median_sim_y.png} }}%
   \qquad
@@ -259,20 +266,10 @@ To construct the uncertainty for the predictions however, we sample $\txsample$ 
   \caption{(a): Median precipitation (prediction). (b): SE of the predictions.}
 \label{fig:meshpred}
 \end{figure}
-\section{Conclusions}
-\begin{itemize}
- \item precipitation in Parana....
- \item GMRF performs better than OLS...
- \item Posterior variance
- \item Which covariates
- 
- \begin{verbatim}
-  -30.1573
-   -0.6476
-   -0.6478
-    0.0005
- \end{verbatim}
 
-\end{itemize}
+\section{Conclusions}
+In this assignment, we have attempted to reconstruct the precipitation in Parana district of Brazil. We see that the South -- South-East regions receive higher precipitation on an average. The uncertainty in the predicted precipitation (and log-precipitation) is lower where the observation grid is denser. From the parameter estimates, we see that although $\kappa^2 > 0$ which is required for positive definites of $\bQ$, it is not diagonally dominant. In the SAR model, we have the difference between the precipitation of a given location and an average of its neighbors are jointly Normal. The variance of this distribution is inversely proportional to $\tau$. From figure~\ref{fig:mesh}, we see that precipitation is spatially well-related (low variance).
+
+In general, GMRF performs better than ordinary regression, as it takes spatial relationship into account throught the SAR model. This is quite evident from figure~\ref{fig:valid}. The posterior uncertainty (for the expected precipitation) is higher where the measurement grid is sparser (more missing data), which is to be expected. We also note that the variance of the intercept is quite large but the other covariates have lower variance. However, elevation does not seem to contribute much and may perhaps be excluded.
 
 \end{document}
