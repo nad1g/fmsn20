@@ -1,0 +1,87 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{amsmath,amssymb,graphicx,float,subfig}
+
+%defines
+\def\bY{{\bf Y}}
+\def\bA{{\bf A}}
+\def\bB{{\bf B}}
+\def\bX{{\bf X}}
+\def\bH{{\bf H}}
+\def\bE{{\bf E}}
+\def\bG{{\bf G}}
+\def\bV{{\bf V}}
+\def\bQ{{\bf Q}}
+\def\btQ{{\bf \tilde Q}}
+\def\bC{{\bf C}}
+\def\btA{{\bf \tilde A}}
+\def\b1{{\bf 1}}
+\def\bx{{\bf x}}
+\def\bb{{\bf b}}
+\def\be{{\bf e}}
+\def\bw{{\bf w}}
+\def\by{{\bf y}}
+\def\bz{{\bf z}}
+\def\btx{{\bf{\tilde x}}}
+\def\blambda{{\boldsymbol \lambda}}
+\def\bgamma{{\boldsymbol \gamma}}
+\def\btheta{{\boldsymbol \theta}}
+\def\bbeta{{\boldsymbol \beta}}
+\def\bnu{{\boldsymbol \nu}}
+\def\bmu{{\boldsymbol \mu}}
+\def\sigmaeps{{\sigma_{\epsilon}}}
+\def\bxmode{{\hat \bx^{(0)}}}
+\def\txmode{{\tilde \bx_{\mathrm{mode}}}}
+\def\txsample{{\tilde \bx_{\mathrm{sample}}}}
+
+%opening
+\title{Home Assignment - 3}
+\author{Santhosh Nadig, Zhanzhang Cai}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Theory}
+Let $\btheta = \{ \sigmaeps^2, \kappa, \tau, p_c\}$ represent the set of parameters. The posterior of the parameters and the latent fields can be written as
+\begin{align}
+ p(\bx, \bz, \btheta | \by) &\propto p(\by | \bx, \bz, \btheta) \cdot p(\bx|\btheta) \cdot p(\bz|\btheta) \nonumber \\
+ &= p(\by | \bx, \bz, \sigmaeps^2) \cdot p(\bx|\kappa, \tau) \cdot p(\bz|p_c)
+\end{align}
+
+\subsection{Conditional Posteriors}
+
+Let $\btA = \begin{bmatrix} \bA(\bz) & \bf{1}\end{bmatrix}$, where  $\bA(\bz)$ is the observation matrix that depends upon the latent field $\bz$. Assuming a constant but unknown mean value $\beta$ for the latent field, we have
+\begin{equation}
+ \underbrace{\begin{bmatrix}
+              \bx \\
+              \beta
+             \end{bmatrix}
+}_{\btx} = N\left( \bf{0}, \underbrace{\begin{bmatrix}
+                                  \bQ & 0 \\
+                                  0 & \bQ_{\beta}
+                                 \end{bmatrix}^{-1}}_{\btQ^{-1}} \right).
+\end{equation}
+where $\bQ_{\beta} =  \mathbb{I}\cdot 10^{-6}$. The observation likelihood can therefore be expressed as
+\begin{equation}
+ \by|\btx, \bz \in N(\btA\btx, \bQ_{\epsilon}^{-1}).
+\end{equation}
+The posterior for $\btx$ given $\by$ is given by [slide 16, lecture 7]
+\begin{equation}
+ \btx|\by, \btheta = N(\mu_{x|y} (\btheta), \bQ_{x|y}(\btheta)^{-1}) 
+\end{equation}
+where
+\begin{align}
+ \mu_{x|y} (\btheta) &=  \bQ_{x|y}(\btheta)^{-1} \btA^T \bQ_{\epsilon} (\btheta) \by \nonumber \\
+ \bQ_{x|y}(\btheta) &= \btQ(\btheta) + \btA^T \bQ_{\epsilon}\btA.
+\end{align}
+
+The posterior $p(\bz|\bx,\btheta,\by)$ is a Bayesian classification problem. Given the parameter $p_c$, the probability of pixel having class 0 is given by
+\begin{align}
+ 
+\end{align}
+
+
+
+\end{document}
