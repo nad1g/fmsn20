@@ -3,7 +3,7 @@
 %
 
 % read image and plot
-im = imread('titan.jpg'); im = double(im);
+im = imread('titan.jpg'); im = double(im)/255;
 figure, subplot(121), imagesc(im); colormap(gray);
 
 % decrease resolution
@@ -20,7 +20,7 @@ r = y - mean(y);
 
 par_fixed = zeros(4,1); par_fixed(3) = 5;
 Nr = length(r);
-Kmax = 20;
+Kmax = 30;
 U = [u1(:),u2(:)];
 % non-parametric covariance estimation...
 [rhat,s2hat,m,n,d] = covest_nonparametric(U,r,Kmax,Dmax);
@@ -34,7 +34,8 @@ for ii = 1:100,
 end
 
 % plot the covariance function, quantiles. see how many points stick out of the quantiles.
-figure; boxplot(rr); hold on; plot(rhat,'k-*'); xlabel('Bin'); ylabel('r(h)');
+qr = quantile(rr,[.25 .75],1);
+figure, plot(qr(1,:),'b--'); hold on; plot(qr(2,:),'b--'); plot(rhat,'k-*');
 A = ones(length(y),1);
 NITER=4;
 for iter = 1:NITER

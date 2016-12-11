@@ -8,6 +8,7 @@
 \def\bX{{\bf X}}
 \def\bH{{\bf H}}
 \def\bE{{\bf E}}
+\def\bI{{\bf I}}
 \def\bG{{\bf G}}
 \def\bV{{\bf V}}
 \def\bQ{{\bf Q}}
@@ -79,9 +80,99 @@ where
 
 The posterior $p(\bz|\bx,\btheta,\by)$ is a Bayesian classification problem. Given the parameter $p_c$, the probability of pixel having class 0 is given by
 \begin{align}
- 
+ p(z_i = 0| y_i, x_i, \btheta) &= \frac{p(y_i|z_i = 0, x_i, \btheta) p(z_i = 0)}{\sum_{k = 0}^1 p(y_i|z_i = k, x_i, \btheta) p(z_i = k)} \nonumber \\
+ &= \frac{p_N(y_i|x_i,\btheta) p_c}{p_N(y_i|x_i,\btheta) p_c + (1-p_c)}
+ \label{eq:bhmclass}
+\end{align}
+where
+\begin{equation}
+ p_N(y_i|x_i,\btheta) = \frac{1}{(2\pi \sigmaeps^2)^{1/2}} \exp\left( - \frac{(y_i - \mu_i)^2}{2\sigmaeps^2} \right)
+\end{equation}
+where $\mu_i = x_i + \beta$. By defining $K = (2\pi\sigmaeps^2)^{1/2}$, $\alpha_i = (y_i - \mu_i)^2/2\sigmaeps^2$ and $q = (1-p_c)/p_c$, we may rewrite equation (\ref{eq:bhmclass}) as
+\begin{align}
+ p(z_i = 0| y_i, x_i, \btheta) &= \frac{\frac{1}{K} \exp(-\alpha_i)}{\frac{1}{K}\exp(-\alpha_i) + q} \nonumber \\
+                               &= \frac{1}{1 + (K~q) \exp(\alpha_i)}
+\end{align}
+For the classification, we select $z_i = 0$ if
+\begin{align}
+ \frac{1}{1 + \exp(\alpha_i + \log(K~q))} &> \frac{1}{2}, \nonumber \\
+ \mathrm{or, }\quad 1 + \exp(\alpha_i) (K~q) &< 2 \nonumber \\
+ \exp(\alpha_i) &< \frac{1}{Kq} \nonumber \\
+ \alpha_i &< -\log(Kq) \nonumber \\
+ (y_i - \mu_i)^2 &< (2\sigmaeps^2) - \log\left( \frac{p_c}{2\pi \sigmaeps^2 (1-p_c)} \right).
+ \label{eq:classification}
 \end{align}
 
+The posterior $p(\sigmaeps^2|\bx,\bz,\by)$ can be expressed as
+\begin{align}
+ p(\sigmaeps^2|\bx,\bz,\by) &\propto p(\by|\sigmaeps^2, \bmu) \nonumber \\
+ &= \prod_{i=1}^n \frac{1}{(2\pi \sigmaeps^2)^{1/2}} \exp \left( -\frac{(y_i - \mu_i)^2}{2\sigmaeps^2} \right) \nonumber \\
+ &\propto \frac{1}{(\sigmaeps^2)^{n/2}} \exp \left(- \sum_{i=1}^n \frac{(y_i - \mu_i)^2}{2\sigmaeps^2} \right).
+\end{align}
+Comparing the above to a standard inverse-Gamma distribution, we obtain the parameters
+\begin{align}
+ \alpha &= \frac{n}{2}-1 \nonumber \\
+ \beta &= \frac{\sum_{i=1}^n(y_i - \mu_i)^2}{2}
+\end{align}
 
+The latent-field $\bx$ is assumed to be drawn from $N(0,\bQ_{\mathrm{SAR}}^{-1})$.The precision matrix for SAR model is given by [lecture 6]
+\begin{equation}
+ \bQ_{\mathrm{SAR}} = \tau \underbrace{(\kappa^2 \bI - \bG)^T (\kappa^2 \bI - \bG)}_{\triangleq \bQ_0(\kappa)}
+\end{equation}
+The conditional posterior of $\tau$ only depends on $\bx$ and can therefore be written as
+\begin{align}
+ p(\tau|\bx,\bz,\by) &\propto p(\bx|\tau) \nonumber \\
+ &\propto |\bQ(\kappa,\tau)|^{1/2} \exp \left( -\frac{1}{2} \bx^T \bQ(\kappa,\tau) \bx \right).
+\end{align}
+where $\bQ(\kappa,\tau) = \tau \bQ_0(\kappa)$. Thus
+\begin{equation}
+ p(\tau|\bx,\bz,\by) \propto \tau^{N/2} |\bQ_0(\kappa)|^{1/2}  \exp \left( - \tau \frac{\bx^T \bQ_0(\kappa) \bx}{2} \right)
+\end{equation}
+Comparing the above with a standard Gamma-distribution, one obtains the parameters as
+\begin{align}
+ \alpha &= \frac{N}{2} + 1 \nonumber  \\
+ \beta &= \frac{\bx^T \bQ_0(\kappa) \bx}{2}
+\end{align}
+
+The posterior for $p_c$ can be expressed as
+\begin{equation}
+ p(p_c | \bx, \bz, \by) \propto p(\bz | p_c)
+\end{equation}
+Supposing there are $k$ pixels that belong to class 0, we may write
+\begin{equation}
+ p(\bz | p_c) \propto p_c^k (1 - p_c)^{N-k}
+\end{equation}
+The above expression resembles the density function of a Beta-distribution. A general Beta distribution with parameters $\alpha$ and $\beta$ and support $x \in [0,1]$ is given by
+\begin{equation}
+ p_{\mathrm{Beta}}(x|\alpha,\beta) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) \Gamma(\beta)} x^{\alpha-1} (1-x)^{\beta-1}
+\end{equation}
+where $\Gamma(\cdot)$ is the standard Gamma function. Comparing the two equations above we see that, {\bf{\em if $k$ is known}}, then $pc \sim p_{\mathrm{Beta}}(k+1, N-k+1)$. However, assuming $p_c$ has a general Beta-prior, one may write the posterior as
+\begin{align}
+ p(p_c|N,k,\alpha,\beta) &\propto p(k|N,p_c)\cdot p(p_c | \alpha, \beta) \nonumber \\
+ & (p_c)^k (1-p_c)^{N-k} \cdot (p_c)^{\alpha-1} (1-p_c)^{\beta-1} \nonumber \\
+ & (p_c)^{k+\alpha-1} (1-p_c)^{N-k+\beta-1},
+\end{align}
+which we recognize as a Beta density function with parameters  $(k+\alpha-1), (N-k+\beta-1)$.
+Thus, we may use a two-step approach to sampling $p_c$. First, we choose an initial $p_c^{(0)}$ and fix the parameters $\alpha,\beta$.
+\begin{enumerate}
+ \item Sample $k^{(i)}$ from Binomial(N,$p_c^{(i-1)}$)
+ \item Sample $p_c^{(i)}$ from Beta($k^{(i)}+\alpha-1, N-k+\beta-1$). 
+\end{enumerate}
+
+The conditinal posteriors to sample from are tabulated below.
+\begin{table}[H]
+\centering
+\begin{tabular}{lp{9cm}}
+\hline
+{\bf Parameter} & {\bf Distribution} \\
+\hline
+$p_c$ & Beta($k+\alpha-1, N-k+\beta-1$), where $k \sim $ Binomial(N,$p_c$).\\
+$\tau$ & Gamma$\left( \frac{N}{2} + 1, \frac{\bx^T \bQ_0(\kappa) \bx}{2}  \right)$ \\
+$\sigmaeps$ & Inverse-Gamma$\left( \frac{n}{2}-1, \frac{\sum_{i=1}^n(y_i - \mu_i)^2}{2} \right)$ \\
+$\bx$ & Normal$\left( \mu_{x|y}, \bQ_{x|y}^{-1}\right)$, which depends on $\bA(z)$.\\
+$\bz$ & Classification as described in equation(\ref{eq:classification}). \\
+\hline
+\end{tabular}
+\end{table}
 
 \end{document}
