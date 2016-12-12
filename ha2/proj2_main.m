@@ -90,12 +90,21 @@ title('GMRF')
 
 lgp = ABall*x_mode;
 figure,
-scatter(mesh.loc(:,1), mesh.loc(:,2), 15, lgp, ..., 
-    'filled', 'markeredgecolor', 'k')
+trisurf(mesh.T, mesh.loc(:,1), mesh.loc(:,2),  ...
+        zeros(size(mesh.loc,1),1), lgp);
 hold on
+%scatter(mesh.loc_obs(:,1), mesh.loc_obs(:,2), 15, mesh.elevation_obs, ..., 
+%    'filled', 'markeredgecolor', 'k')
 plot(Border(:,1),Border(:,2),'-',...
   Border(1034:1078,1),Border(1034:1078,2),'-')
-colorbar; hold off; axis tight
+view(0,90); shading interp; colorbar;
+hold off; axis tight
+%scatter(mesh.loc(:,1), mesh.loc(:,2), 15, lgp, ..., 
+%    'filled', 'markeredgecolor', 'k')
+%hold on
+%plot(Border(:,1),Border(:,2),'-',...
+%  Border(1034:1078,1),Border(1034:1078,2),'-')
+%colorbar; hold off; axis tight
 %calculate mean precipitation for mesh locations
 Y_mesh_gmrf = exp(ABall*(repmat(x_mode,1,100)+v));
 Y_mesh_gmrf_mean = mean(Y_mesh_gmrf,2);

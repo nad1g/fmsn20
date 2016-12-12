@@ -28,13 +28,13 @@ logp = -(sum(f) - 0.5*x_0'*Q*x_0) ;
 
 if nargout>1
   %compute derivatives (if needed, i.e. nargout>1)
-  df = -b + b*z.*y.*exp(-z);
+  df = -b + b*y.*exp(-z);
   Dlogp = Q*x_0 - A'*df;
 end
 
 if nargout>2
   %compute hessian (if needed, i.e. nargout>2)
-  d2f = b*y.*exp(-z).*(1-z);
+  d2f = -b*y.*exp(-z);
   d2f(d2f>0) = 0;
   n = size(A,1);
   D2logp = Q - A'*spdiags(d2f,0,n,n)*A;
