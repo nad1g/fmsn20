@@ -2,58 +2,75 @@
 % Home Assignment 3
 %
 
-% read image and plot
 im = imread('titan.jpg'); im = double(im)/255;
-figure, subplot(121), imagesc(im); colormap(gray);
-
-% decrease resolution
-y = im(1:4:end,1:4:end);
-subplot(122), imagesc(y), colormap(gray);
-[m,n] = size(y);
-[u1,u2] = ndgrid(1:m,1:n);
-D = distance_matrix([u1(:), u2(:)]);
-Dmax = max(D(:))+0.1;
-
-%compute mean component by regressing with co-ordinates
-y = colstack(y);
-r = y - mean(y);
-
-par_fixed = zeros(4,1); par_fixed(3) = 5;
-Nr = length(r);
-Kmax = 30;
+imsz = size(im);
+N = numel(im);
+[u1,u2] = ndgrid(1:imsz(1), 1:imsz(2));
 U = [u1(:),u2(:)];
-% non-parametric covariance estimation...
-[rhat,s2hat,m,n,d] = covest_nonparametric(U,r,Kmax,Dmax);
 
-% build quantiles from 100 bootstrap
+NITER=1000;
+k = zeros(NITER,1);
+tau = zeros(NITER,1);
+pc = zeros(NITER,1);
+sigma_eps = zeros(NITER,1);
 
-for ii = 1:100,
-  idx = randperm(Nr);
-  rp = r(idx); % randomly permuted residuals.
-  [rr(ii,:),s2hat,m,n,d] = covest_nonparametric(U,rp,Kmax,Dmax);
+% Y = observations
+Y = im(:);
+b = mean(Y);
+
+% x = GMRF
+x = Y-b;
+
+% Generate Q_sar
+kappa = 2;
+tau(1) = rand();
+[C,G,G2] = matern_prec_matrices(U);
+Q_0 = (kappa^4*C + 2*kappa^2 + G2);
+Q = tau(1)*Q_0;
+
+% Initialize pc, z
+pc(1) = rand();
+z = rand(imsz) > pc(1);
+ab = 2; bb = 3; % hyper-parameters for the beta distribution
+
+% Initialize sigma_eps
+sigma_eps(1) = rand();
+
+% sample conditional posteriors...
+for ii = 2:NITER,
+    disp(['iteration ',num2str(ii)]);
+    % sample tau
+    alpha_g = (N/2)+1; 
+    beta_g = x'*Q_0*x/2;
+    tau(ii) = gamrnd(alpha_g,1/beta_g);
+    
+    % sample sigma_eps
+    known_idx = find(~z);
+    n = length(known_idx);
+    alpha_ig = (n/2)-1;
+    beta_ig = sum((Y(known_idx)-(x(known_idx)+b)).^2)/2;
+    sigma_eps(ii) = 1/gamrnd(alpha_ig, 1/beta_ig);
+
+    % sample pc
+    k(ii) = binornd(N,pc(ii-1));
+    pc(ii) = betarnd(k(ii)+ab, N-k(ii)+bb);
+    
+    % determine p(z), classify..
+    thresh = (2*sigma_eps(ii)^2) - log(pc(ii)/(2*pi*sigma_eps(ii)^2*(1-pc(ii))));
+    z = (Y - (x + b*ones(size(x)))).^2 < thresh;
+    
+    % sample x
+    A = sparse(1:length(Y(known_idx)),known_idx, 1, length(Y(known_idx)), N);
+    Qbeta = speye(1)*1e-6;
+    Q = tau(ii)*Q_0; Qall = blkdiag(Q,Qbeta);
+    Qxy = Q + A'*A/sigma_eps(ii)^2;
+    p = amd(Qxy);
+    Qxy = Qxy(p,p);
+    R = chol(Qxy);
+    A = A(:,p);
+    x = b + R\randn(size(R,1),1);
+    x(p) = x;
+    Exy = Qxy\(Aall'*Qeps*Y);
+    Exy(p) = Exy;
+    b = x(end);
 end
-
-% plot the covariance function, quantiles. see how many points stick out of the quantiles.
-qr = quantile(rr,[.25 .75],1);
-figure, plot(qr(1,:),'b--'); hold on; plot(qr(2,:),'b--'); plot(rhat,'k-*');
-A = ones(length(y),1);
-NITER=4;
-for iter = 1:NITER
-  % compute binned covariance estimate
-  [rhat,s2hat,m,n,d] = covest_nonparametric(U,r,Kmax,Dmax);
-  % use covest_ls to estimate covariance parameters
-  par = covest_ls(rhat(1:8),s2hat,m,n,d(1:8),par_fixed);
-  % estimate new 'beta's.
-  sigma2 = par(1); kappa = par(2); nu = par(3);
-  Sigma_kk= matern_covariance(D,sigma2,kappa,nu);
-  % account for the nugget variance (sigma_eps^2 = s2hat)
-  Sigma_kk = Sigma_kk + s2hat * eye(size(Sigma_kk)); 
-  Sigma_inv_A = Sigma_kk\A; Sigma_inv_y = Sigma_kk\y;
-  b = (A'*Sigma_inv_A)\(A'*Sigma_inv_y);
-  % compute residuals
-  r = y-A*b;
-end
-% estimate a 'kappa' which shall be fixed.
-%par = estimate_matern_param(y,par_init,show_plot);
-
-
