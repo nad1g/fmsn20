@@ -174,7 +174,11 @@ The Gibbs Sampler algorithm sequentially samples from the conditional posteriors
 \end{equation}
 
 \section{Results}
-For the first experiment, we choose to add 10\% corrupted pixels and $\sigmaeps^2 = 1e-4$. The reconstructed image and estimated parameters are plotted in figures and respectively.
+For the first experiment, we choose to add 10\% corrupted pixels and $\sigmaeps^2 = 1e-4$. The reconstructed image and estimated parameters are plotted in figures (\ref{fig:img10}) and (\ref{fig:param10}) respectively. In figure (\ref{fig:img10})(c) (bottom-left), the reconstructed image has enhanced shadows and reduced sharpness due to the structure of the $\bQ$ matrix.
+
+For the second experiment, the observation noise level was retained as before, but the corrupted pixels were increased to 25\%. The results are shown in figures (\ref{fig:img25}) and (\ref{fig:param25}) respectively.
+
+We measured the sum of squared errors between (a) original image and observed image (with noise and corrupted pixels), and (b) original image and the reconstructed image for 10\%, 25\% and 50\% corrupted pixels and same measurment noise level as before. The results are plotted in figure (\ref{fig:sse}). Although, it appears that the recovery at 50\% corrupted pixels is pretty good, the final image is not visually acceptable.
 \begin{figure}[H]
  \centering
  \includegraphics[width=8cm, height=8cm]{image.png}
@@ -187,6 +191,23 @@ For the first experiment, we choose to add 10\% corrupted pixels and $\sigmaeps^
  \caption{Parameter value vs. iterations of the Gibbs sampler.}
  \label{fig:param10}
 \end{figure}
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=8cm, height=8cm]{image_n25.png}
+ \caption{Reconstruction of image with 25\% corrupted pixels and observation noise of $\sigmaeps^2 = 1e-4$.}
+ \label{fig:img25}
+\end{figure}
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=8cm, height=8cm]{params_n25.png}
+ \caption{Parameter value vs. iterations of the Gibbs sampler.}
+ \label{fig:param25}
+\end{figure}
 
-
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=8cm, height=8cm]{sse.png}
+ \caption{Plot of sum of squared error. The red curve is the sum of squared difference between original and observed images. The green curve is the sum of squared difference between the original and reconstructed images.}
+ \label{fig:sse}
+\end{figure}
 \end{document}
