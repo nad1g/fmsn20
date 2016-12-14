@@ -3,12 +3,12 @@
 %
 
 im = imread('titan.jpg'); im = double(im)/255;
-nn = rand(size(im)) < .25; nidx = find(nn == 1);
+nn = rand(size(im)) < .1; nidx = find(nn == 1);
 imsz = size(im);
 N = numel(im);
 
 
-NITER=1000;
+NITER=200;
 k = zeros(NITER,1);
 tau = zeros(NITER,1);
 pc = zeros(NITER,1);
@@ -37,7 +37,7 @@ Q_0 = gmrfprec(imsz,q);
 %Q_0 = kappa^4*C + 2*kappa^2*G + G2;
 
 % Initialize pc, z
-pc(1) = .55;
+pc(1) = .91;
 k(1) = round(N*pc(1));
 
 z = rand(N,1) > pc(1);
@@ -51,11 +51,6 @@ for ii = 2:NITER,
     disp(['iteration ',num2str(ii)]);
     
     good_idx = find(z==0);
-
-    if isempty(good_idx)
-       disp('all z set to 1');
-       break;
-    end
 
     A = sparse(1:length(Y(good_idx)),good_idx, 1, length(Y(good_idx)), N);
     Aall = [A ones(length(Y(good_idx)),1)]; %this is A_tilde

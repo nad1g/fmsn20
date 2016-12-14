@@ -43,17 +43,46 @@
 \maketitle
 
 \section{Introduction}
+In this project, we consider the problem of reconstructing an image which is corrupted by random (uniform) noise using a Bayesian hierarchical model framework. The corrupted image is observed with a small additive white Gaussian noise. We use a Gaussian Markov Random Field (GMRF) SAR-model as prior for the image. In addition, a set of latent indicators indicate whether the pixel is corrupted. A Gibbs sampler is implemented to sample the parameters of the model from their conditional posteriors which enables us to re-construct the image (posterior image).
+
+\section{Data and Model}
+The input is a 215-by-126 pixel RGB image. The pixels in the input image are assumed to be corrupted independently by uniform random noise with probability ($1-p_c$) and a noisy version of this corrupted image (additive white Gaussian noise with variance $\sigmaeps^2$) is observed. The corrupted pixel locations and the variance of the observation noise are unknown and need to be estimated.
+
+The proposed Bayesian hierarchical model is as follows: A latent field $\bx$ which is a Matern GMRF (SAR-model) is used as prior for the image. Thus, we may express $\bx$ as
+\begin{equation}
+ \bx \in N(\bmu, \bQ^{-1})
+ \label{eq:latentfield}
+\end{equation}
+where $\bQ$ is a SAR precision matrix which is parametrized as 
+\begin{equation*}
+ \bQ = \tau \bQ_0
+\end{equation*}
+where $\bQ_0 = (\kappa^2 \bI - \bG)^T (\kappa^2 \bI - \bG)$ with $\kappa$ begin fixed apriori [lecture 6].
+
+A latent indicator field $\bz$ indicates whether or not a pixel is corrupted. The prior distribution for $\bz(s)$ is $p(\bz(s)) = 0$ with probability $p_c$ and $p(\bz(s) = 1)$ with probability $(1-p_c)$. Therefore, given the latent image and indicators, the observation for each pixel can be written as
+\begin{equation}
+ y(s)|\bx,\bz \in \begin{cases}
+                   N(x(s), \sigmaeps^2),\quad \mathrm{if }~ z(s) = 0,\\
+                   U(0,1), \quad \mathrm{if }~ z(s) = 1.
+                  \end{cases}
+\end{equation}
+
+To proceed with parameter estimation and reconstruction, the first step is to fix the parameter $\kappa$. This is done by obtaining a binned covariance function using the residuals $\by - \bE(\by)$. 
+
+TBD:Figure
+
+The estimation of the posterior image (reconstruction) is explained in the next section.
 
 \section{Theory}
-Let $\btheta = \{ \sigmaeps^2, \kappa, \tau, p_c\}$ represent the set of parameters. The posterior of the parameters and the latent fields can be written as
+Let $\bA$ represent the observation matrix (with all the pixels) and let $\btA = \begin{bmatrix} \bA & \mathbf{1} \end{bmatrix}$. Furthermore, denote $\btA(z) = \begin{bmatrix} \bA(\bz) & \bf{1}\end{bmatrix}$, the observation matrix that is constructed with the ``uncorrupted'' pixels (i.e., where $\bz(s) = 1$) which in turns depends upon the latent field $\bz$. We denote the set of parameters  $\btheta = \{ \sigmaeps^2, \kappa, \tau, p_c\}$ represent the set of parameters. The posterior of the parameters and the latent fields can be written as
 \begin{align}
  p(\bx, \bz, \btheta | \by) &\propto p(\by | \bx, \bz, \btheta) \cdot p(\bx|\btheta) \cdot p(\bz|\btheta) \nonumber \\
  &= p(\by | \bx, \bz, \sigmaeps^2) \cdot p(\bx|\kappa, \tau) \cdot p(\bz|p_c)
 \end{align}
-
+An expression for each of the conditional posteriors is elaborated in the subsequent sections.
 \subsection{Conditional Posteriors}
-
-Let $\btA = \begin{bmatrix} \bA(\bz) & \bf{1}\end{bmatrix}$, where  $\bA(\bz)$ is the observation matrix that depends upon the latent field $\bz$. Assuming a constant but unknown mean value $\beta$ for the latent field, we have
+\subsubsection{$p(\bx|\bz,\btheta,\by)$}
+Assuming a constant but unknown mean value $\beta$ for the latent field $\bx$, we have
 \begin{equation}
  \underbrace{\begin{bmatrix}
               \bx \\
@@ -78,6 +107,7 @@ where
  \bQ_{x|y}(\btheta) &= \btQ(\btheta) + \btA^T \bQ_{\epsilon}\btA.
 \end{align}
 
+\subsubsection{$p(\bz|\bx,\btheta,\by)$}
 The posterior $p(\bz|\bx,\btheta,\by)$ is a Bayesian classification problem. Given the parameter $p_c$, the probability of pixel having class 0 is given by
 \begin{align}
  p(z_i = 0| y_i, x_i, \btheta) &= \frac{p(y_i|z_i = 0, x_i, \btheta) p(z_i = 0)}{\sum_{k = 0}^1 p(y_i|z_i = k, x_i, \btheta) p(z_i = k)} \nonumber \\
@@ -88,38 +118,23 @@ where
 \begin{equation}
  p_N(y_i|x_i,\btheta) = \frac{1}{(2\pi \sigmaeps^2)^{1/2}} \exp\left( - \frac{(y_i - \mu_i)^2}{2\sigmaeps^2} \right)
 \end{equation}
-where $\mu_i = x_i + \beta$. By defining $K = (2\pi\sigmaeps^2)^{1/2}$, $\alpha_i = (y_i - \mu_i)^2/2\sigmaeps^2$ and $q = (1-p_c)/p_c$, we may rewrite equation (\ref{eq:bhmclass}) as
-\begin{align}
- p(z_i = 0| y_i, x_i, \btheta) &= \frac{\frac{1}{K} \exp(-\alpha_i)}{\frac{1}{K}\exp(-\alpha_i) + q} \nonumber \\
-                               &= \frac{1}{1 + (K~q) \exp(\alpha_i)}
-\end{align}
-For the classification, we select $z_i = 0$ if
-\begin{align}
- \frac{1}{1 + \exp(\alpha_i + \log(K~q))} &> \frac{1}{2}, \nonumber \\
- \mathrm{or, }\quad 1 + \exp(\alpha_i) (K~q) &< 2 \nonumber \\
- \exp(\alpha_i) &< \frac{1}{Kq} \nonumber \\
- \alpha_i &< -\log(Kq) \nonumber \\
- (y_i - \mu_i)^2 &< (2\sigmaeps^2) - \log\left( \frac{p_c}{(2\pi \sigmaeps^2)^{1/2} (1-p_c)} \right).
- \label{eq:classification}
-\end{align}
+where $\mu_i = x_i + \beta$.
 
+\subsubsection{$p(\sigmaeps^2|\bx,\bz,\by)$}
 The posterior $p(\sigmaeps^2|\bx,\bz,\by)$ can be expressed as
 \begin{align}
  p(\sigmaeps^2|\bx,\bz,\by) &\propto p(\by|\sigmaeps^2, \bmu) \nonumber \\
  &= \prod_{i=1}^n \frac{1}{(2\pi \sigmaeps^2)^{1/2}} \exp \left( -\frac{(y_i - \mu_i)^2}{2\sigmaeps^2} \right) \nonumber \\
- &\propto \frac{1}{(\sigmaeps^2)^{n/2}} \exp \left(- \sum_{i=1}^n \frac{(y_i - \mu_i)^2}{2\sigmaeps^2} \right).
+ &\propto \frac{1}{(\sigmaeps^2)^{n/2}} \exp \left(- \sum_{i=1}^n \frac{(y_i - \mu_i)^2}{2\sigmaeps^2} \right)
 \end{align}
-Comparing the above to a standard inverse-Gamma distribution, we obtain the parameters
+where $n$ represents the number of ``good'' pixels (i.e., for which $\bz(s) = 0$). Comparing the above expression to a standard inverse-Gamma distribution, we obtain the parameters
 \begin{align}
  \alpha &= \frac{n}{2}-1 \nonumber \\
  \beta &= \frac{\sum_{i=1}^n(y_i - \mu_i)^2}{2}
 \end{align}
 
-The latent-field $\bx$ is assumed to be drawn from $N(0,\bQ_{\mathrm{SAR}}^{-1})$.The precision matrix for SAR model is given by [lecture 6]
-\begin{equation}
- \bQ_{\mathrm{SAR}} = \tau \underbrace{(\kappa^2 \bI - \bG)^T (\kappa^2 \bI - \bG)}_{\triangleq \bQ_0(\kappa)}
-\end{equation}
-The conditional posterior of $\tau$ only depends on $\bx$ and can therefore be written as
+\subsubsection{$p(\tau|\bx,\bz,\by)$}
+The latent-field $\bx$ is assumed to be drawn according to equation (\ref{eq:latentfield}) implying that the conditional posterior of $\tau$ only depends on $\bx$ and can therefore be written as
 \begin{align}
  p(\tau|\bx,\bz,\by) &\propto p(\bx|\tau) \nonumber \\
  &\propto |\bQ(\kappa,\tau)|^{1/2} \exp \left( -\frac{1}{2} \bx^T \bQ(\kappa,\tau) \bx \right).
@@ -134,6 +149,7 @@ Comparing the above with a standard Gamma-distribution, one obtains the paramete
  \beta &= \frac{\bx^T \bQ_0(\kappa) \bx}{2}
 \end{align}
 
+\subsubsection{$p(p_c | \bx, \bz, \by)$}
 The posterior for $p_c$ can be expressed as
 \begin{equation}
  p(p_c | \bx, \bz, \by) \propto p(\bz | p_c)
@@ -146,33 +162,31 @@ The above expression resembles the density function of a Beta-distribution. A ge
 \begin{equation}
  p_{\mathrm{Beta}}(x|\alpha,\beta) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) \Gamma(\beta)} x^{\alpha-1} (1-x)^{\beta-1}
 \end{equation}
-where $\Gamma(\cdot)$ is the standard Gamma function. Comparing the two equations above we see that, {\bf{\em if $k$ is known}}, then $pc \sim p_{\mathrm{Beta}}(k+1, N-k+1)$. However, assuming $p_c$ has a general Beta-prior, one may write the posterior as
-\begin{align}
- p(p_c|N,k,\alpha,\beta) &\propto p(k|N,p_c)\cdot p(p_c | \alpha, \beta) \nonumber \\
- & (p_c)^k (1-p_c)^{N-k} \cdot (p_c)^{\alpha-1} (1-p_c)^{\beta-1} \nonumber \\
- & (p_c)^{k+\alpha-1} (1-p_c)^{N-k+\beta-1},
-\end{align}
-which we recognize as a Beta density function with parameters  $(k+\alpha-1), (N-k+\beta-1)$.
-Thus, we may use a two-step approach to sampling $p_c$. First, we choose an initial $p_c^{(0)}$ and fix the parameters $\alpha,\beta$.
-\begin{enumerate}
- \item Sample $k^{(i)}$ from Binomial(N,$p_c^{(i-1)}$)
- \item Sample $p_c^{(i)}$ from Beta($k^{(i)}+\alpha-1, N-k+\beta-1$). 
-\end{enumerate}
+Comparing the two equations above, we have the parameters
+\begin{equation}
+ \alpha = k + 1, \quad \beta = N-k+1.
+\end{equation}
 
-The conditinal posteriors to sample from are tabulated below.
-\begin{table}[H]
-\centering
-\begin{tabular}{lp{9cm}}
-\hline
-{\bf Parameter} & {\bf Distribution} \\
-\hline
-$p_c$ & Beta($k+\alpha-1, N-k+\beta-1$), where $k \sim $ Binomial(N,$p_c$).\\
-$\tau$ & Gamma$\left( \frac{N}{2} + 1, \frac{\bx^T \bQ_0(\kappa) \bx}{2}  \right)$ \\
-$\sigmaeps$ & Inverse-Gamma$\left( \frac{n}{2}-1, \frac{\sum_{i=1}^n(y_i - \mu_i)^2}{2} \right)$ \\
-$\bx$ & Normal$\left( \mu_{x|y}, \bQ_{x|y}^{-1}\right)$, which depends on $\bA(z)$.\\
-$\bz$ & Classification as described in equation(\ref{eq:classification}). \\
-\hline
-\end{tabular}
-\end{table}
+\subsubsection{Gibbs Sampler}
+The Gibbs Sampler algorithm sequentially samples from the conditional posteriors described above. The posterior image is reconstructed after the final iteration of the Gibbs sampler as
+\begin{equation}
+ \hat \by = \bA \bx + \beta \mathbf{1}.
+\end{equation}
+
+\section{Results}
+For the first experiment, we choose to add 10\% corrupted pixels and $\sigmaeps^2 = 1e-4$. The reconstructed image and estimated parameters are plotted in figures and respectively.
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=8cm, height=8cm]{image.png}
+ \caption{Reconstruction of image with 10\% corrupted pixels and observation noise of $\sigmaeps^2 = 1e-4$.}
+ \label{fig:img10}
+\end{figure}
+\begin{figure}[H]
+ \centering
+ \includegraphics[width=8cm, height=8cm]{params.png}
+ \caption{Parameter value vs. iterations of the Gibbs sampler.}
+ \label{fig:param10}
+\end{figure}
+
 
 \end{document}
