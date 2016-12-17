@@ -34,7 +34,7 @@ disp('theta')
 theta
 disp('exp(theta)')
 exp(theta)
-H = gmrf_param_hessian(@(th) gmrf_negloglike_Gam(th,Y(Iobs),ABobs(Iobs,:),C, G, G2, 2), theta0);
+H = gmrf_param_hessian(@(th) gmrf_negloglike_Gam(th,Y(Iobs),ABobs(Iobs,:),C, G, G2, 2), theta);
 Hinv = inv(H);
 th_se = sqrt(diag(Hinv));
 disp('SE(exp(theta))');
@@ -89,42 +89,41 @@ ylabel('Estimated precipitation')
 title('GMRF')
 
 lgp = ABall*x_mode;
+
 figure,
 trisurf(mesh.T, mesh.loc(:,1), mesh.loc(:,2),  ...
         zeros(size(mesh.loc,1),1), lgp);
 hold on
-%scatter(mesh.loc_obs(:,1), mesh.loc_obs(:,2), 15, mesh.elevation_obs, ..., 
-%    'filled', 'markeredgecolor', 'k')
 plot(Border(:,1),Border(:,2),'-',...
   Border(1034:1078,1),Border(1034:1078,2),'-')
 view(0,90); shading interp; colorbar;
 hold off; axis tight
-%scatter(mesh.loc(:,1), mesh.loc(:,2), 15, lgp, ..., 
-%    'filled', 'markeredgecolor', 'k')
-%hold on
-%plot(Border(:,1),Border(:,2),'-',...
-%  Border(1034:1078,1),Border(1034:1078,2),'-')
-%colorbar; hold off; axis tight
+
 %calculate mean precipitation for mesh locations
 Y_mesh_gmrf = exp(ABall*(repmat(x_mode,1,100)+v));
 Y_mesh_gmrf_mean = mean(Y_mesh_gmrf,2);
 Y_mesh_gmrf_se = std(Y_mesh_gmrf,0,2);
+
 %plot the mesh predictions and standard error.
 figure,
-scatter(mesh.loc(:,1), mesh.loc(:,2), 15, Y_mesh_gmrf_mean, ..., 
-    'filled', 'markeredgecolor', 'k')
+trisurf(mesh.T, mesh.loc(:,1), mesh.loc(:,2),  ...
+        zeros(size(mesh.loc,1),1), Y_mesh_gmrf_mean);
 hold on
 plot(Border(:,1),Border(:,2),'-',...
   Border(1034:1078,1),Border(1034:1078,2),'-')
-colorbar; hold off; axis tight
+view(0,90); shading interp; colorbar;
+hold off; axis tight
+title('GMRF (mean)');
 
 figure,
-scatter(mesh.loc(:,1), mesh.loc(:,2), 15, Y_mesh_gmrf_se, ..., 
-    'filled', 'markeredgecolor', 'k')
+trisurf(mesh.T, mesh.loc(:,1), mesh.loc(:,2),  ...
+        zeros(size(mesh.loc,1),1), Y_mesh_gmrf_se);
 hold on
 plot(Border(:,1),Border(:,2),'-',...
   Border(1034:1078,1),Border(1034:1078,2),'-')
-colorbar; hold off; axis tight
+view(0,90); shading interp; colorbar;
+hold off; axis tight
+title('GMRF (SE)');
 
 %simulate x_mode from p(x|y,theta) (Gaussian approx) N(0,Q_xy^-1)
 x_mode_sim = repmat(x_mode,1,100) + v;
@@ -150,17 +149,23 @@ sim_y = gamrnd(b,zz/b);
 var_sim_y = var(sim_y,0,2);
 median_sim_y = median(sim_y,2);
 
+
 figure,
-scatter(mesh.loc(:,1), mesh.loc(:,2), 15, median_sim_y, ..., 
-    'filled', 'markeredgecolor', 'k')
+trisurf(mesh.T, mesh.loc(:,1), mesh.loc(:,2),  ...
+        zeros(size(mesh.loc,1),1), median_sim_y);
 hold on
 plot(Border(:,1),Border(:,2),'-',...
   Border(1034:1078,1),Border(1034:1078,2),'-')
-colorbar; hold off; axis tight
+view(0,90); shading interp; colorbar;
+hold off; axis tight
+title('Median prediction');
+
 figure,
-scatter(mesh.loc(:,1), mesh.loc(:,2), 15, sqrt(var_sim_y), ..., 
-    'filled', 'markeredgecolor', 'k')
+trisurf(mesh.T, mesh.loc(:,1), mesh.loc(:,2),  ...
+        zeros(size(mesh.loc,1),1), sqrt(var_sim_y));
 hold on
 plot(Border(:,1),Border(:,2),'-',...
   Border(1034:1078,1),Border(1034:1078,2),'-')
-colorbar; hold off; axis tight
+view(0,90); shading interp; colorbar;
+hold off; axis tight
+title('SE of the prediction');

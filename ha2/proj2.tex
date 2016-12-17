@@ -174,9 +174,9 @@ The estimated parameters $\hat \bbeta$ and their corresponding standard errors t
 \hline
 {\bf Parameter} & {\bf Estimate} & {\bf SE} \\
 \hline
-$\hat \beta_0$ & -10.8703 & 1.9788 \\
-$\hat \beta_1$ & -0.2430 & 0.0413 \\
-$\hat \beta_2$ & -0.2234 & 0.0429 \\
+$\hat \beta_0$ & -11.1884 & 1.9092 \\
+$\hat \beta_1$ & -0.2498 & 0.0398 \\
+$\hat \beta_2$ & -0.2234 & 0.0414 \\
 $\hat \beta_3$ & 0.0006 & 0.0001 \\
 \hline
 \end{tabular}
@@ -223,9 +223,9 @@ The parameter estimates $\hat \btheta$ are obtained by maximizing the log-poster
 \hline
 {\bf $\hat \btheta$} & {$\exp(\hat \btheta)$} & {\bf SE} (of $\exp(\hat \theta)$) \\
 \hline
-$\hat \theta_1 =  0.8585$ & $\hat \tau = 2.3595 $ & 1.0017 \\
-$\hat \theta_2 = -1.3448$ & $\hat \kappa^2 = 0.2606 $ &  1.0006 \\
-$\hat \theta_3 = 2.6496$ & $\hat b = 14.1485$ & 1.0005 \\
+$\hat \theta_1 =   -0.1440$ & $\hat \tau = 0.8659 $ & 1.3016 \\
+$\hat \theta_2 = -1.7081$ & $\hat \kappa^2 = 0.1812 $ &  3.0909 \\
+$\hat \theta_3 = 3.0951$ & $\hat b = 22.0903$ & 1.0735 \\
 \hline
 \end{tabular}
 \caption{GMRF parameter estimate and standard errors.}
@@ -234,7 +234,7 @@ $\hat \theta_3 = 2.6496$ & $\hat b = 14.1485$ & 1.0005 \\
 
 The reconstruction of the latent field ($\txmode$) is extracted at the last iteration of the maximization of the log-likelihood (minmization of the negative log-likelihood). The expected precipitation at the validation locations is given by $\bE(\hat \by_v) = \exp(\btA_v \txmode)$. The variance (and the standard error, SE) of the latent field (log precipitation) is calculated by simulating (100 times) from a Gaussian distribution with precision matrix $\bQ_{x|y}$. The following steps are used to achieve this:
 \begin{enumerate}
- \item Compute the Cholesky-factorization $\bQ_{x|y} = R\cdot R^T$.
+ \item Compute the Cholesky-factorization $\bQ_{x|y} = R^T\cdot R$.
  \item Sample $z \in N(0,\mathbb{I})$.
  \item Solve for $v$ such that $R^T v = z$. Then, $v \in N(0,\bQ_{x|y}^{-1})$.
 \end{enumerate} 
@@ -248,7 +248,7 @@ For the validation locations, the expected precipitation and the corresponding c
 
 
 The same procedure is applied to determine the mean precipitation at all the locations in the mesh (2884 locations). The estimated mean precipitation and the corresponding standard error are plotted in figure~\ref{fig:mesh}
-\begin{figure}[ht]
+\begin{figure}[H]
 \centering
   \subfloat[]{{\includegraphics[width=5cm, height=4cm]{mesh_mean_obs.png} }}%
   \qquad
