@@ -8,8 +8,9 @@ imsz = size(im);
 [u1,u2] = ndgrid(1:imsz(1),1:imsz(2));
 
 %subsample the image
-idx = rand(imsz) > 0.75;
-Y = im(idx); u1 = u1(idx); u2 = u2(idx);
+%idx = rand(imsz) > 0.75;
+%Y = im(idx); u1 = u1(idx); u2 = u2(idx);
+Y = im;
 Y = Y(:);
 x = Y - mean(Y);
 U = [u1(:),u2(:)];
@@ -23,16 +24,16 @@ Kmax = 30;
 figure, plot(d, rhat, 'k-x'); hold on;
 N = length(x);
 % bootstrap
-rr = zeros(50,length(rhat));
-for ii = 1:50,
-   idx = randperm(N);
-   xp = x(idx); % randomly permuted residuals.
-   [rr(ii,:),s2hat,m,n,d] = covest_nonparametric([u1(:),u2(:)],xp,Kmax,Dmax);
-end
+%rr = zeros(50,length(rhat));
+%for ii = 1:50,
+%   idx = randperm(N);
+%   xp = x(idx); % randomly permuted residuals.
+%   [rr(ii,:),s2hat,m,n,d] = covest_nonparametric([u1(:),u2(:)],xp,Kmax,Dmax);
+%end
  
-r_quant = quantile(rr,[.25 .75],1);
-plot(d,r_quant(1,:),'b--');
-plot(d,r_quant(2,:),'b--');
+%r_quant = quantile(rr,[.25 .75],1);
+%plot(d,r_quant(1,:),'b--');
+%plot(d,r_quant(2,:),'b--');
 
 NITER = 10;
 par_fixed = zeros(4,1);
